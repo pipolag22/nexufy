@@ -1,43 +1,32 @@
 package com.example.nexufy.persistence.entities;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
-
-@Entity
+@Document(collection = "customers")
 public class Customer {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(unique = true, nullable = false)
-    private int id;
-    @Column
+    private String id; // Cambiado a String para MongoDB
     private String dni;
-    @Column
     private String name;
-    @Column
     private String lastname;
-    @Column
     private String address;
-    @Column
     private String email;
-    @Column
     private String phone;
-    @Column
     private Date birthdate;
-    @Column
     private char gender;
-    @Column
-    private Date  registrationdate;
-    @Column
-    private String typeCustomer;
+    private Date registrationdate;
+    private String tipoCliente;
 
+    // Getters y setters
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -113,13 +102,11 @@ public class Customer {
         this.registrationdate = registrationdate;
     }
 
-    public String getTypeCustomer() {
-        return typeCustomer;
+    public String getTipoCliente() {
+        return tipoCliente;
     }
 
-    public void setTypeCustomer(String typeCustomer) {
-        this.typeCustomer = typeCustomer;
+    public void setTipoCliente(String tipoCliente) {
+        this.tipoCliente = tipoCliente;
     }
 }
-
-
