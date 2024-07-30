@@ -2,11 +2,16 @@ package com.example.nexufy.persistence.entities;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Transient;
 
 @Document(collection = "products")
 public class Product {
+
+    @Transient
+    public static final String SEQUENCE_NAME = "products_sequence";
+
     @Id
-    private String id; // Cambiado a String para MongoDB
+    private Long id; // Cambiado a String para MongoDB
     private String name;
     private String description;
     private double price;
@@ -25,11 +30,11 @@ public class Product {
         return name;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

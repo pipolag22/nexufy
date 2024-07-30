@@ -16,29 +16,19 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+    @PostMapping
+    public Product createProduct(@RequestBody Product product) {
+        return productService.saveProduct(product);
+    }
+
     @GetMapping
     public List<Product> getAllProducts() {
         return productService.getAllProducts();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable String id) {
-        Optional<Product> product = productService.getProductById(id);
-        return product.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @PostMapping
-    public Product addProduct(@RequestBody Product product) {
-        return productService.addProduct(product);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable String id, @RequestBody Product product) {
-        try {
-            return ResponseEntity.ok(productService.updateProduct(id, product));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public Optional<Product> getProductById(@PathVariable String id) {
+        return productService.getProductById(id);
     }
 
     @DeleteMapping("/{id}")
