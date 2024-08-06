@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "products")
 public class Product {
     @Id
-    private String id; // Cambiado a String para MongoDB
+    private String id;
     private String name;
     private String description;
     private double price;
