@@ -12,11 +12,8 @@ import java.util.Optional;
 public class ProductService {
     @Autowired
     private ProductRepository productRepository;
-    @Autowired
-    private SequenceService sequenceService;
 
     public Product saveProduct(Product product) {
-        product.setId(sequenceService.generateSequence(Product.SEQUENCE_NAME));
         return productRepository.save(product);
     }
 
@@ -36,8 +33,8 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
-    public Product updateProduct(long id, Product product) {
-        product.setId(id); // Asegúrate de establecer el ID del producto que se va a actualizar
+    public Product updateProduct(String id, Product product) {
+        product.setId(id);
         return productRepository.save(product);
     }
 }
