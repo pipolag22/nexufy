@@ -30,7 +30,7 @@ public class ProductService {
     }
 
     public Product updateProduct(String id, Product product) {
-        product.setId(id); // Asegúrate de establecer el ID del producto que se va a actualizar
+        product.setId(id);
         return productRepository.save(product);
     }
 }

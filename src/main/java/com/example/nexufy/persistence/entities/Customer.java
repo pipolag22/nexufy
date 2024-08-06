@@ -1,4 +1,6 @@
 package com.example.nexufy.persistence.entities;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -8,11 +10,16 @@ import java.util.Date;
 @Document(collection = "customers")
 public class Customer {
     @Id
-    private String id; // Cambiado a String para MongoDB
+    private String id;
     private String dni;
+    @NotNull
+    private String username;
+    @NotNull
+    private String password;
     private String name;
     private String lastname;
     private String address;
+    @NotNull
     private String email;
     private String phone;
     private Date birthdate;
@@ -36,6 +43,21 @@ public class Customer {
 
     public void setDni(String dni) {
         this.dni = dni;
+    }
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getName() {
