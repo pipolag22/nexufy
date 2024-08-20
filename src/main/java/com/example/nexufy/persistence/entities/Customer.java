@@ -36,22 +36,18 @@ public class Customer {
     private List<Product> products;
 
 
-    public List<Product> getProducts() {
-        return products;
+
+
+
+
+
+
+
+
+    // Método para agregar un producto
+    public void addProduct(Product product) {
+        this.products.add(product);
     }
-
-    public void setProducts(List<Product> products) {
-        this.products = products;
-    }
-
-
-
-
-
-    // Nueva lista de productos referenciados
-    @DBRef
-    private List<Product> products;
-
 
     // Getters y setters
 
