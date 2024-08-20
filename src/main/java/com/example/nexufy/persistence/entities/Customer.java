@@ -1,29 +1,57 @@
 package com.example.nexufy.persistence.entities;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Document(collection = "customers")
 public class Customer {
     @Id
-    private String id; // Cambiado a String para MongoDB
+    private String id;
     private String dni;
+    @NotNull
+    private String username;
+    @NotNull
+    private String password;
     private String name;
     private String lastname;
     private String address;
+    @NotNull
     private String email;
     private String phone;
     private Date birthdate;
     private char gender;
     private Date registrationdate;
     private String tipoCliente;
+
+    @JsonIgnore
+    private List<Product> products;
+
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
+    }
+
+
+
+
+
     // Nueva lista de productos referenciados
     @DBRef
     private List<Product> products;
+
 
     // Getters y setters
 
@@ -41,6 +69,21 @@ public class Customer {
 
     public void setDni(String dni) {
         this.dni = dni;
+    }
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getName() {
