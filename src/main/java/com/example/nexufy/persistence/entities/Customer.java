@@ -5,6 +5,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ public class Customer {
     private char gender;
     private Date registrationdate;
     private String tipoCliente;
+
     @JsonIgnore
     private List<Product> products;
 
@@ -44,6 +46,11 @@ public class Customer {
 
 
 
+
+
+    // Nueva lista de productos referenciados
+    @DBRef
+    private List<Product> products;
 
 
     // Getters y setters
@@ -149,5 +156,13 @@ public class Customer {
 
     public void setTipoCliente(String tipoCliente) {
         this.tipoCliente = tipoCliente;
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
     }
 }
