@@ -8,7 +8,6 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,19 +24,7 @@ public class CustomerService {
         return customerRepository.findById(id);
     }
 
-    public List<Product> getProductsByCustomerId(String customerId) {
-        Optional<Customer> optionalCustomer = customerRepository.findById(customerId);
-        if (optionalCustomer.isPresent()) {
-            return optionalCustomer.get().getProducts();
-        } else {
-            throw new RuntimeException("Customer not found with id: " + customerId);
-        }
-    }
-
     public Customer addCustomer(Customer customer) {
-        if (customer.getProducts() == null) {
-            customer.setProducts(new ArrayList<>());
-        }
         return customerRepository.save(customer);
     }
 
@@ -48,5 +35,14 @@ public class CustomerService {
     public Customer updateCustomer(String id, Customer customer) {
         customer.setId(String.valueOf(new ObjectId(id)));
         return customerRepository.save(customer);
+    }
+
+    public List<Product> getProductsByCustomerId(String customerId) {
+        Optional<Customer> optionalCustomer = customerRepository.findById(customerId);
+        if (optionalCustomer.isPresent()) {
+            return optionalCustomer.get().getProducts();
+        } else {
+            throw new RuntimeException("Customer not found with id: " + customerId);
+        }
     }
 }
