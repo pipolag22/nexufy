@@ -2,10 +2,14 @@ package com.example.nexufy.persistence.entities;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Document(collection = "customers")
 public class Customer {
@@ -26,6 +30,21 @@ public class Customer {
     private char gender;
     private Date registrationdate;
     private String tipoCliente;
+    @JsonIgnore
+    private List<Product> products;
+
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
+    }
+
+
+
+
 
     // Getters y setters
 

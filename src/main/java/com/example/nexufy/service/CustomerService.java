@@ -2,11 +2,13 @@ package com.example.nexufy.service;
 
 
 import com.example.nexufy.persistence.entities.Customer;
+import com.example.nexufy.persistence.entities.Product;
 import com.example.nexufy.persistence.repository.CustomerRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +25,19 @@ public class CustomerService {
         return customerRepository.findById(id);
     }
 
+    public List<Product> getProductsByCustomerId(String customerId) {
+        Optional<Customer> optionalCustomer = customerRepository.findById(customerId);
+        if (optionalCustomer.isPresent()) {
+            return optionalCustomer.get().getProducts();
+        } else {
+            throw new RuntimeException("Customer not found with id: " + customerId);
+        }
+    }
+
     public Customer addCustomer(Customer customer) {
+        if (customer.getProducts() == null) {
+            customer.setProducts(new ArrayList<>());
+        }
         return customerRepository.save(customer);
     }
 
