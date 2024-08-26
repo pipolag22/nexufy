@@ -17,6 +17,20 @@ public class CustomerController {  // Cambiado a CustomerController
     @Autowired
     private CustomerService customerService;
 
+    @PostMapping("/register")
+    public ResponseEntity<String> registerUser(@RequestBody Customer customer) {
+        if (customerService.findByUsername(customer.getUsername()).isPresent()) {
+            return ResponseEntity.badRequest().body("Username already exists");
+        }
+
+        if (customerService.findByEmail(customer.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email already exists");
+        }
+
+        customerService.saveCustomer(customer);
+        return ResponseEntity.ok("User registered successfully");
+    }
+
 
     @GetMapping
     public List<Customer> getAllCustomer() {
