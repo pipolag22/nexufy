@@ -17,6 +17,23 @@ public class CustomerController {  // Cambiado a CustomerController
     @Autowired
     private CustomerService customerService;
 
+    // Método para manejar el login
+    @PostMapping("/login")
+    public ResponseEntity<String> loginUser(@RequestBody Customer loginRequest) {
+        Optional<Customer> customerOpt = customerService.findByUsername(loginRequest.getUsername());
+
+        if (customerOpt.isPresent()) {
+            Customer customer = customerOpt.get();
+            if (customer.getPassword().equals(loginRequest.getPassword())) {
+                return ResponseEntity.ok("Login successful");
+            } else {
+                return ResponseEntity.badRequest().body("Invalid password");
+            }
+        } else {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+    }
+
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody Customer customer) {
         if (customerService.findByUsername(customer.getUsername()).isPresent()) {
