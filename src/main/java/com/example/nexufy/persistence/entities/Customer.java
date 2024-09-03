@@ -35,6 +35,10 @@ public class Customer {
     @JsonIgnore
     private List<Product> products;
 
+    @JsonIgnore
+    @DBRef
+    private List<Subscription> subscriptions = new ArrayList<>();
+
 
 
 
@@ -160,5 +164,13 @@ public class Customer {
 
     public void setProducts(List<Product> products) {
         this.products = products;
+    }
+
+    public List<Subscription> getSubscriptions() {
+        return subscriptions;
+    }
+
+    public void setSubscriptions(List<Subscription> subscriptions) {
+        this.subscriptions = subscriptions;
     }
 }
