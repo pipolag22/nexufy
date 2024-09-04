@@ -10,48 +10,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/customer")
-public class CustomerController {  // Cambiado a CustomerController
+public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
-    // Método para manejar el login
-    @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody Customer loginRequest) {
-        Optional<Customer> customerOpt = customerService.findByUsername(loginRequest.getUsername());
-
-        if (customerOpt.isPresent()) {
-            Customer customer = customerOpt.get();
-            if (customer.getPassword().equals(loginRequest.getPassword())) {
-                return ResponseEntity.ok("Login successful");
-            } else {
-                return ResponseEntity.badRequest().body("Invalid password");
-            }
-        } else {
-            return ResponseEntity.badRequest().body("User not found");
-        }
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody Customer customer) {
-        if (customerService.findByUsername(customer.getUsername()).isPresent()) {
-            return ResponseEntity.badRequest().body("Username already exists");
-        }
-
-        if (customerService.findByEmail(customer.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email already exists");
-        }
-
-        customerService.saveCustomer(customer);
-        return ResponseEntity.ok("User registered successfully");
-    }
-
-
     @GetMapping
-    public List<Customer> getAllCustomer() {
-        return customerService.getAllCustomer();
+    public ResponseEntity<List<Customer>> getAllCustomer() {
+        List<Customer> customers = customerService.getAllCustomer();
+        return ResponseEntity.ok(customers);
     }
 
     @GetMapping("/{id}")
@@ -60,34 +29,30 @@ public class CustomerController {  // Cambiado a CustomerController
         return customer.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public Customer addCustomer(@RequestBody Customer customer) {
-        return customerService.addCustomer(customer);
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<Customer> updateCustomer(@PathVariable String id, @RequestBody Customer customer) {
-        Optional<Customer> optionalCustomer = customerService.getCustomerById(id);
-        if (optionalCustomer.isPresent()) {
-            return ResponseEntity.ok(customerService.updateCustomer(id, customer));
+        if (customerService.getCustomerById(id).isPresent()) {
+            Customer updatedCustomer = customerService.updateCustomer(id, customer);
+            return ResponseEntity.ok(updatedCustomer);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
-    // Método para obtener todos los productos de un cliente
     @GetMapping("/{customerId}/products")
-    public List<Product> getProductsByCustomerId(@PathVariable String customerId) {
-        return customerService.getProductsByCustomerId(customerId);
+    public ResponseEntity<List<Product>> getProductsByCustomerId(@PathVariable String customerId) {
+        List<Product> products = customerService.getProductsByCustomerId(customerId);
+        return ResponseEntity.ok(products);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable String id) {
         if (customerService.getCustomerById(id).isPresent()) {
             customerService.deleteCustomer(id);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.noContent().build(); // 204 No Content
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 }
+
