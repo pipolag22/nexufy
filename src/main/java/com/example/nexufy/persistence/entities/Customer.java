@@ -8,41 +8,38 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Document(collection = "customers")
 public class Customer {
     @Id
     private String id;
     private String dni;
+
     @NotNull
     private String username;
+
     @NotNull
     private String password;
     private String name;
     private String lastname;
     private String address;
+
     @NotNull
     private String email;
     private String phone;
     private Date birthdate;
-    private char gender;
     private Date registrationdate;
-    private String tipoCliente;
 
     @JsonIgnore
     private List<Product> products;
 
+    @JsonIgnore
+    @DBRef
+    private List<Subscription> subscriptions = new ArrayList<>();
 
-
-
-
-
-
-
-
+    @DBRef
+    private Set<Role> roles = new HashSet<>();
 
     // Método para agregar un producto
     public void addProduct(Product product) {
@@ -130,13 +127,6 @@ public class Customer {
         this.birthdate = birthdate;
     }
 
-    public char getGender() {
-        return gender;
-    }
-
-    public void setGender(char gender) {
-        this.gender = gender;
-    }
 
     public Date getRegistrationdate() {
         return registrationdate;
@@ -146,19 +136,32 @@ public class Customer {
         this.registrationdate = registrationdate;
     }
 
-    public String getTipoCliente() {
-        return tipoCliente;
-    }
-
-    public void setTipoCliente(String tipoCliente) {
-        this.tipoCliente = tipoCliente;
-    }
-
     public List<Product> getProducts() {
         return products;
     }
 
     public void setProducts(List<Product> products) {
         this.products = products;
+    }
+
+    public List<Subscription> getSubscriptions() {
+        return subscriptions;
+    }
+
+    public void setSubscriptions(List<Subscription> subscriptions) {
+        this.subscriptions = subscriptions;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+    public Customer(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
     }
 }
