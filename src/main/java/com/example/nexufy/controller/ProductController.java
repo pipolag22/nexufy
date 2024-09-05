@@ -20,9 +20,15 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
+    public List<Product> getHomeProducts() {
+        return productService.getTopRatedProducts();
+    }
+
+    @GetMapping("/all")
     public List<Product> getAllProducts() {
         return productService.getAllProducts();
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable String id) {

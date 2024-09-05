@@ -67,6 +67,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/test/**").permitAll()
                         .requestMatchers("/api/customer/**").authenticated()  // Rutas de clientes requieren autenticación
                         .requestMatchers("/api/products/**").permitAll()  // Rutas de productos no requieren autenticación
+                        .requestMatchers("/api/rating-comments/**").permitAll()
                         .anyRequest().authenticated());
 
         http.authenticationProvider(authenticationProvider());
