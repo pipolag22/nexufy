@@ -9,29 +9,28 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Document(collection = "customers")
 public class Customer {
     @Id
     private String id;
     private String dni;
+
     @NotNull
     private String username;
+
     @NotNull
     private String password;
     private String name;
     private String lastname;
     private String address;
+
     @NotNull
     private String email;
     private String phone;
     private Date birthdate;
-    private char gender;
     private Date registrationdate;
-    private String tipoCliente;
 
     @JsonIgnore
     private List<Product> products;
@@ -42,10 +41,6 @@ public class Customer {
     @NotNull(message = "Role is required")
     private String role;
 
-    // Constantes de roles
-    public static final String ROLE_USER = "ROLE_USER";
-    public static final String ROLE_ADMIN = "ROLE_ADMIN";
-    public static final String ROLE_SUPERADMIN = "ROLE_SUPERADMIN";
 
     // Getters y setters
 
@@ -129,13 +124,6 @@ public class Customer {
         this.birthdate = birthdate;
     }
 
-    public char getGender() {
-        return gender;
-    }
-
-    public void setGender(char gender) {
-        this.gender = gender;
-    }
 
     public Date getRegistrationdate() {
         return registrationdate;
@@ -143,14 +131,6 @@ public class Customer {
 
     public void setRegistrationdate(Date registrationdate) {
         this.registrationdate = registrationdate;
-    }
-
-    public String getTipoCliente() {
-        return tipoCliente;
-    }
-
-    public void setTipoCliente(String tipoCliente) {
-        this.tipoCliente = tipoCliente;
     }
 
     public List<Product> getProducts() {
@@ -169,14 +149,5 @@ public class Customer {
         this.subscriptions = subscriptions;
     }
 
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        if (!ROLE_USER.equals(role) && !ROLE_ADMIN.equals(role) && !ROLE_SUPERADMIN.equals(role)) {
-            throw new IllegalArgumentException("Invalid role");
-        }
-        this.role = role;
     }
 }
