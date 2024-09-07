@@ -1,4 +1,5 @@
 package com.example.nexufy.persistence.entities;
+
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -38,20 +39,13 @@ public class Customer {
     @JsonIgnore
     @DBRef
     private List<Subscription> subscriptions = new ArrayList<>();
+    @NotNull(message = "Role is required")
+    private String role;
 
-
-
-
-
-
-
-
-
-
-    // Método para agregar un producto
-    public void addProduct(Product product) {
-        this.products.add(product);
-    }
+    // Constantes de roles
+    public static final String ROLE_USER = "ROLE_USER";
+    public static final String ROLE_ADMIN = "ROLE_ADMIN";
+    public static final String ROLE_SUPERADMIN = "ROLE_SUPERADMIN";
 
     // Getters y setters
 
@@ -70,6 +64,7 @@ public class Customer {
     public void setDni(String dni) {
         this.dni = dni;
     }
+
     public String getUsername() {
         return username;
     }
@@ -172,5 +167,16 @@ public class Customer {
 
     public void setSubscriptions(List<Subscription> subscriptions) {
         this.subscriptions = subscriptions;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        if (!ROLE_USER.equals(role) && !ROLE_ADMIN.equals(role) && !ROLE_SUPERADMIN.equals(role)) {
+            throw new IllegalArgumentException("Invalid role");
+        }
+        this.role = role;
     }
 }
