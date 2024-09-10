@@ -64,8 +64,7 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/test/**").permitAll()
-                        .requestMatchers("/api/customer/**").authenticated()  // Rutas de clientes requieren autenticación
+                        .requestMatchers("/api/customer/**").permitAll()  // Rutas de clientes requieren autenticación
                         .requestMatchers("/api/products/**").permitAll()  // Rutas de productos no requieren autenticación
                         .requestMatchers("/api/rating-comments/**").permitAll()
                         .anyRequest().authenticated());
