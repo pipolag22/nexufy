@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+
 @Component
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
@@ -21,17 +22,17 @@ public class JwtUtils {
     @Value("${nexufy.app.jwtSecret}")
     private String jwtSecret;
 
+    // Ajustamos la duración del token a 30 minutos
     @Value("${nexufy.app.jwtExpirationMs}")
-    private int jwtExpirationMs;
+    private int jwtExpirationMs = 1800000; // 30 min
 
     public String generateJwtToken(Authentication authentication) {
-
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
         return Jwts.builder()
-                .setSubject((userPrincipal.getUsername()))
+                .setSubject(userPrincipal.getUsername())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs)) // Expiración en 30 minutos
                 .signWith(key(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -57,7 +58,7 @@ public class JwtUtils {
             logger.error("JWT token is unsupported: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
             logger.error("JWT claims string is empty: {}", e.getMessage());
-        }catch (SignatureException e) {
+        } catch (SignatureException e) {
             logger.error("Invalid JWT signature: {}", e.getMessage());
         }
 

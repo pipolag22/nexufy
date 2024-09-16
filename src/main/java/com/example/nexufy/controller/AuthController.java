@@ -13,6 +13,7 @@ import com.example.nexufy.security.jwt.JwtUtils;
 import com.example.nexufy.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -32,18 +33,21 @@ import java.util.stream.Collectors;
 public class AuthController {
     @Autowired
     AuthenticationManager authenticationManager;
+
     @Autowired
     RoleRepository roleRepository;
+
     @Autowired
     CustomerRepository customerRepository;
+
     @Autowired
     PasswordEncoder encoder;
+
     @Autowired
     JwtUtils jwtUtils;
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
@@ -62,6 +66,7 @@ public class AuthController {
                 roles));
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPERADMIN')")
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         if (customerRepository.existsByUsername(registerRequest.getUsername())) {
@@ -76,39 +81,35 @@ public class AuthController {
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
 
-        // Create new user's account
+
         Customer customer = new Customer(registerRequest.getUsername(),
                 registerRequest.getEmail(),
                 encoder.encode(registerRequest.getPassword()));
 
-        Set<String> strRoles = registerRequest.getRoles();
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+
         Set<Role> roles = new HashSet<>();
-
-        if (strRoles == null) {
+        if (userDetails.getAuthorities().stream()
+                .anyMatch(role -> role.getAuthority().equals("ROLE_SUPERADMIN"))) {
+            // Si es superadmin, puede asignar cualquier rol
+            Role adminRole = roleRepository.findByName(EnumRoles.ROLE_ADMIN)
+                    .orElseThrow(() -> new RuntimeException("Error: Admin Role is not found."));
             Role userRole = roleRepository.findByName(EnumRoles.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    .orElseThrow(() -> new RuntimeException("Error: User Role is not found."));
+
+            if (registerRequest.getRoles().contains("admin")) {
+                roles.add(adminRole);
+            }
+            roles.add(userRole); // Agregar rol de usuario
+        } else if (userDetails.getAuthorities().stream()
+                .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"))) {
+
+            Role userRole = roleRepository.findByName(EnumRoles.ROLE_USER)
+                    .orElseThrow(() -> new RuntimeException("Error: User Role is not found."));
             roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(EnumRoles.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-
-                        break;
-                    case "super":
-                        Role modRole = roleRepository.findByName(EnumRoles.ROLE_SUPERADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(modRole);
-
-                        break;
-                    default:
-                        Role userRole = roleRepository.findByName(EnumRoles.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(userRole);
-                }
-            });
         }
 
         customer.setRoles(roles);
