@@ -8,15 +8,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -36,7 +33,6 @@ public class SecurityConfig {
     public AuthTokenFilter authenticationJwtTokenFilter() {
         return new AuthTokenFilter();
     }
-
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -63,14 +59,28 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/customer/**").permitAll()  // Rutas de clientes requieren autenticación
-                        .requestMatchers("/api/products/**").permitAll()  // Rutas de productos no requieren autenticación
+                .authorizeHttpRequests(auth -> auth
+                        // Rutas públicas
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/products/**").permitAll()
                         .requestMatchers("/api/rating-comments/**").permitAll()
+
+                        // Rutas protegidas (requieren autenticación)
+                        .requestMatchers("/api/customer/**").authenticated()
+
+                        // Rutas de promoción a admin, solo accesibles para usuarios con rol USER
+                        .requestMatchers("/api/user/promote/admin").hasRole("USER")
+
+                        // Rutas de promoción a superadmin, solo accesibles para usuarios con rol ADMIN
+                        .requestMatchers("/api/admin/promote/superadmin").hasRole("ADMIN")
+
+                        // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated());
 
+        // Configurar proveedor de autenticación
         http.authenticationProvider(authenticationProvider());
 
+        // Filtro de JWT para interceptar las solicitudes
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

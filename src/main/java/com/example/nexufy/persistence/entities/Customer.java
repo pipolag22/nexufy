@@ -1,14 +1,17 @@
 package com.example.nexufy.persistence.entities;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.*;
+import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Document(collection = "customers")
 public class Customer {
@@ -16,6 +19,9 @@ public class Customer {
     private String id;
     private String dni;
 
+    private boolean isSuspended;
+    private LocalDateTime suspendedUntil; // Fecha hasta cuando está suspendido
+    private String suspendedReason;
     @NotNull
     private String username;
 
@@ -28,25 +34,58 @@ public class Customer {
     @NotNull
     private String email;
     private String phone;
-    private Date birthdate;
-    private Date registrationdate;
+    private LocalDate birthdate;
+    private LocalDate registrationdate;
 
     @JsonIgnore
-    private List<Product> products;
+    private List<Product> products = new ArrayList<>();
 
     @JsonIgnore
     @DBRef
     private List<Subscription> subscriptions = new ArrayList<>();
 
-    @DBRef
+    @NotNull(message = "Roles are required")
     private Set<Role> roles = new HashSet<>();
 
-    // Método para agregar un producto
-    public void addProduct(Product product) {
-        this.products.add(product);
+    @NotNull(message = "Role is required")
+    private EnumRoles role;
+
+    // Constructor por defecto
+    public Customer() {
+    }
+
+    // Constructor con argumentos
+    public Customer(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
     }
 
     // Getters y setters
+
+    public boolean isSuspended() {
+        return isSuspended;
+    }
+
+    public void setSuspended(boolean isSuspended) {
+        this.isSuspended = isSuspended;
+    }
+
+    public LocalDateTime getSuspendedUntil() {
+        return suspendedUntil;
+    }
+
+    public void setSuspendedUntil(LocalDateTime suspendedUntil) {
+        this.suspendedUntil = suspendedUntil;
+    }
+
+    public String getSuspendedReason() {
+        return suspendedReason;
+    }
+
+    public void setSuspendedReason(String suspendedReason) {
+        this.suspendedReason = suspendedReason;
+    }
 
     public String getId() {
         return id;
@@ -63,6 +102,7 @@ public class Customer {
     public void setDni(String dni) {
         this.dni = dni;
     }
+
     public String getUsername() {
         return username;
     }
@@ -119,20 +159,19 @@ public class Customer {
         this.phone = phone;
     }
 
-    public Date getBirthdate() {
+    public LocalDate getBirthdate() {
         return birthdate;
     }
 
-    public void setBirthdate(Date birthdate) {
+    public void setBirthdate(LocalDate birthdate) {
         this.birthdate = birthdate;
     }
 
-
-    public Date getRegistrationdate() {
+    public LocalDate getRegistrationdate() {
         return registrationdate;
     }
 
-    public void setRegistrationdate(Date registrationdate) {
+    public void setRegistrationdate(LocalDate registrationdate) {
         this.registrationdate = registrationdate;
     }
 
@@ -159,9 +198,12 @@ public class Customer {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
-    public Customer(String username, String email, String password) {
-        this.username = username;
-        this.email = email;
-        this.password = password;
+
+    public EnumRoles getRole() {
+        return role;
+    }
+
+    public void setRole(EnumRoles role) {
+        this.role = role;
     }
 }
