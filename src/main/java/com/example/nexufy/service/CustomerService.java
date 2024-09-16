@@ -1,6 +1,7 @@
 package com.example.nexufy.service;
 
 import com.example.nexufy.persistence.entities.Customer;
+import com.example.nexufy.persistence.entities.EnumRoles;
 import com.example.nexufy.persistence.entities.Product;
 import com.example.nexufy.persistence.repository.CustomerRepository;
 import org.bson.types.ObjectId;
@@ -17,6 +18,10 @@ public class CustomerService {
 
     public Optional<Customer> findByUsername(String username) {
         return customerRepository.findByUsername(username);
+    }
+
+    public Optional<Customer> findByEmail(String email) { // Añadido aquí
+        return customerRepository.findByEmail(email);
     }
 
     public Customer saveCustomer(Customer customer) {
@@ -77,18 +82,18 @@ public class CustomerService {
 
     // Método para validar permisos de creación según roles
     public void validateRolePermissions(Customer creator, Customer newCustomer) {
-        String creatorRole = creator.getRole();
-        String newCustomerRole = newCustomer.getRole();
+        EnumRoles creatorRole = creator.getRole();
+        EnumRoles newCustomerRole = newCustomer.getRole();
 
-        if ("ROLE_USER".equals(newCustomerRole) && !"ROLE_ADMIN".equals(creatorRole) && !"ROLE_SUPERADMIN".equals(creatorRole)) {
+        if (EnumRoles.ROLE_USER.equals(newCustomerRole) && !(EnumRoles.ROLE_ADMIN.equals(creatorRole) || EnumRoles.ROLE_SUPERADMIN.equals(creatorRole))) {
             throw new IllegalArgumentException("Only admins or superadmins can create users");
         }
 
-        if ("ROLE_ADMIN".equals(newCustomerRole) && !"ROLE_SUPERADMIN".equals(creatorRole)) {
+        if (EnumRoles.ROLE_ADMIN.equals(newCustomerRole) && !EnumRoles.ROLE_SUPERADMIN.equals(creatorRole)) {
             throw new IllegalArgumentException("Only superadmins can create admins");
         }
 
-        if ("ROLE_SUPERADMIN".equals(newCustomerRole)) {
+        if (EnumRoles.ROLE_SUPERADMIN.equals(newCustomerRole)) {
             throw new IllegalArgumentException("Creating superadmin is not allowed");
         }
     }
@@ -107,8 +112,8 @@ public class CustomerService {
             throw new IllegalArgumentException("Password is required");
         }
 
-        String role = customer.getRole();
-        if (!Customer.ROLE_USER.equals(role) && !Customer.ROLE_ADMIN.equals(role) && !Customer.ROLE_SUPERADMIN.equals(role)) {
+        EnumRoles role = customer.getRole();
+        if (!EnumRoles.ROLE_USER.equals(role) && !EnumRoles.ROLE_ADMIN.equals(role) && !EnumRoles.ROLE_SUPERADMIN.equals(role)) {
             throw new IllegalArgumentException("Invalid role");
         }
     }
