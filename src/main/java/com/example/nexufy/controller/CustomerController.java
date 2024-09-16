@@ -1,21 +1,33 @@
 package com.example.nexufy.controller;
 
+import com.example.nexufy.payload.request.RegisterRequest;
+import com.example.nexufy.payload.response.MessageResponse;
 import com.example.nexufy.persistence.entities.Customer;
+import com.example.nexufy.persistence.entities.EnumRoles;
 import com.example.nexufy.persistence.entities.Product;
+import com.example.nexufy.persistence.repository.CustomerRepository;
 import com.example.nexufy.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
-
+import java.util.Set;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/customer")
 public class CustomerController {
     @Autowired
     private CustomerService customerService;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private PasswordEncoder encoder;
 
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody Customer loginRequest) {
@@ -34,107 +46,102 @@ public class CustomerController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody Customer newCustomer,
-                                               @RequestParam(required = false) String creatorUsername) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+        if (customerRepository.existsByUsername(registerRequest.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Username is already taken!"));
+        }
 
-        if (creatorUsername != null) {
-            Optional<Customer> creatorOpt = customerService.findByUsername(creatorUsername);
-            if (!creatorOpt.isPresent()) {
-                return ResponseEntity.badRequest().body("Creator user not found");
-            }
+        if (customerRepository.existsByEmail(registerRequest.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Email is already in use!"));
+        }
 
-            Customer creator = creatorOpt.get();
+        // Create new user's account
+        Customer customer = new Customer();
+        customer.setUsername(registerRequest.getUsername());
+        customer.setEmail(registerRequest.getEmail());
+        customer.setPassword(encoder.encode(registerRequest.getPassword()));
 
-            try {
-                customerService.validateRolePermissions(creator, newCustomer);
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().body(e.getMessage());
-            }
+        Set<String> strRoles = registerRequest.getRoles();
+        EnumRoles role;
+
+        if (strRoles == null || strRoles.isEmpty()) {
+            role = EnumRoles.ROLE_USER;
         } else {
-            newCustomer.setRole(Customer.ROLE_USER);
+            switch (strRoles.iterator().next()) {
+                case "admin":
+                    role = EnumRoles.ROLE_ADMIN;
+                    break;
+                case "super":
+                    role = EnumRoles.ROLE_SUPERADMIN;
+                    break;
+                default:
+                    role = EnumRoles.ROLE_USER;
+                    break;
+            }
         }
 
-        if (customerService.findByUsername(newCustomer.getUsername()).isPresent()) {
-            return ResponseEntity.badRequest().body("Username already exists");
-        }
+        customer.setRole(role);
+        customerRepository.save(customer);
 
-        if (customerService.findByEmail(newCustomer.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email already exists");
-        }
-
-        customerService.saveCustomer(newCustomer);
-        return ResponseEntity.ok("User registered successfully");
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
-    @PostMapping
-    public ResponseEntity<String> addCustomer(@RequestBody Customer customer, @RequestParam String creatorUsername) {
-        Optional<Customer> creatorOpt = customerService.findByUsername(creatorUsername);
+    @PostMapping("/add")
+    public ResponseEntity<String> addCustomer(@RequestBody Customer newCustomer,
+                                              @RequestParam String creatorUsername) {
 
-        if (!creatorOpt.isPresent()) {
-            return ResponseEntity.badRequest().body("Creator user not found");
+        try {
+            Customer createdCustomer = customerService.addCustomer(newCustomer, creatorUsername);
+            return ResponseEntity.ok("Customer added successfully: " + createdCustomer.getId());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        Customer creator = creatorOpt.get();
-
-        if ("ROLE_USER".equals(customer.getRole()) && !"ROLE_ADMIN".equals(creator.getRole()) && !"ROLE_SUPERADMIN".equals(creator.getRole())) {
-            return ResponseEntity.badRequest().body("Only admins or superadmins can create users");
-        }
-
-        if ("ROLE_ADMIN".equals(customer.getRole()) && !"ROLE_SUPERADMIN".equals(creator.getRole())) {
-            return ResponseEntity.badRequest().body("Only superadmins can create admins");
-        }
-
-        if ("ROLE_SUPERADMIN".equals(customer.getRole())) {
-            return ResponseEntity.badRequest().body("Creating superadmin is not allowed");
-        }
-
-        if (customerService.findByUsername(customer.getUsername()).isPresent()) {
-            return ResponseEntity.badRequest().body("Username already exists");
-        }
-
-        if (customerService.findByEmail(customer.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email already exists");
-        }
-
-        customerService.saveCustomer(customer);
-        return ResponseEntity.ok("Customer added successfully");
     }
 
-    @GetMapping
-    public ResponseEntity<List<Customer>> getAllCustomer() {
-        List<Customer> customers = customerService.getAllCustomer();
-        return ResponseEntity.ok(customers);
+    @GetMapping("/all")
+    public List<Customer> getAllCustomers() {
+        return customerService.getAllCustomer();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Customer> getCustomerById(@PathVariable String id) {
-        Optional<Customer> customer = customerService.getCustomerById(id);
-        return customer.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
+        Optional<Customer> customerOpt = customerService.getCustomerById(id);
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable String id, @RequestBody Customer customer) {
-        if (customerService.getCustomerById(id).isPresent()) {
-            Customer updatedCustomer = customerService.updateCustomer(id, customer);
-            return ResponseEntity.ok(updatedCustomer);
+        if (customerOpt.isPresent()) {
+            return ResponseEntity.ok(customerOpt.get());
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
-    @GetMapping("/{customerId}/products")
-    public ResponseEntity<List<Product>> getProductsByCustomerId(@PathVariable String customerId) {
-        List<Product> products = customerService.getProductsByCustomerId(customerId);
-        return ResponseEntity.ok(products);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteCustomer(@PathVariable String id) {
+        customerService.deleteCustomer(id);
+        return ResponseEntity.ok("Customer deleted successfully");
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable String id) {
-        if (customerService.getCustomerById(id).isPresent()) {
-            customerService.deleteCustomer(id);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateCustomer(@PathVariable String id,
+                                                 @RequestBody Customer customer) {
+        try {
+            Customer updatedCustomer = customerService.updateCustomer(id, customer);
+            return ResponseEntity.ok("Customer updated successfully: " + updatedCustomer.getId());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}/products")
+    public ResponseEntity<List<Product>> getProductsByCustomerId(@PathVariable String id) {
+        try {
+            List<Product> products = customerService.getProductsByCustomerId(id);
+            return ResponseEntity.ok(products);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
         }
     }
 }
