@@ -22,9 +22,9 @@ public class JwtUtils {
     @Value("${nexufy.app.jwtSecret}")
     private String jwtSecret;
 
-    // Ajustamos la duración del token a 30 minutos
+
     @Value("${nexufy.app.jwtExpirationMs}")
-    private int jwtExpirationMs = 1800000; // 30 min
+    private int jwtExpirationMs;
 
     public String generateJwtToken(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
@@ -32,7 +32,7 @@ public class JwtUtils {
         return Jwts.builder()
                 .setSubject(userPrincipal.getUsername())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs)) // Expiración en 30 minutos
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key(), SignatureAlgorithm.HS256)
                 .compact();
     }
