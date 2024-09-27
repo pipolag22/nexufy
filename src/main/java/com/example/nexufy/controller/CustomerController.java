@@ -1,5 +1,6 @@
 package com.example.nexufy.controller;
 
+import com.example.nexufy.payload.request.AddProfile;
 import com.example.nexufy.payload.request.RegisterRequest;
 import com.example.nexufy.payload.response.MessageResponse;
 import com.example.nexufy.persistence.entities.Customer;
@@ -144,4 +145,36 @@ public class CustomerController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+    @PutMapping("/profile/{id}")
+    public ResponseEntity<String> updateCustomerProfile(@PathVariable String id,
+                                                        @Valid @RequestBody AddProfile profileUpdate) {
+        try {
+            Customer existingCustomer = customerService.findById(id);
+
+            if (profileUpdate.getName() != null) {
+                existingCustomer.setName(profileUpdate.getName());
+            }
+
+            if (profileUpdate.getLastname() != null) {
+                existingCustomer.setLastname(profileUpdate.getLastname());
+            }
+
+            if (profileUpdate.getAddress() != null) {
+                existingCustomer.setAddress(profileUpdate.getAddress());
+            }
+
+            if (profileUpdate.getBirthdate() != null) {
+                existingCustomer.setBirthdate(profileUpdate.getBirthdate());
+            }
+
+            existingCustomer.setEmail(profileUpdate.getEmail());
+
+            customerService.save(existingCustomer);
+
+            return ResponseEntity.ok("Customer profile updated successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }
