@@ -16,6 +16,17 @@ public class CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
 
+    public Customer findById(String id) {
+
+        Optional<Customer> optionalCustomer = customerRepository.findById(id);
+
+        return optionalCustomer.orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+    }
+
+    public Customer save(Customer customer) {
+        return customerRepository.save(customer);
+    }
+
     public Optional<Customer> findByUsername(String username) {
         return customerRepository.findByUsername(username);
     }
@@ -98,7 +109,7 @@ public class CustomerService {
         }
     }
 
-    // Validar que el objeto Customer cumpla con las restricciones
+
     private void validateCustomer(Customer customer) {
         if (customer.getUsername() == null || customer.getUsername().isEmpty()) {
             throw new IllegalArgumentException("Username is required");
