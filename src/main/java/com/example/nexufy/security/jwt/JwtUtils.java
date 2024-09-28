@@ -24,7 +24,7 @@ public class JwtUtils {
 
     // Ajustamos la duración del token a 30 minutos
     @Value("${nexufy.app.jwtExpirationMs}")
-    private int jwtExpirationMs = 1800000; // 30 min
+    private int jwtExpirationMs ; // 30 min
 
     public String generateJwtToken(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
