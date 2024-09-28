@@ -66,7 +66,7 @@ public class AuthController {
                 roles));
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPERADMIN')")
+    //@PreAuthorize("hasRole('ADMIN') or hasRole('SUPERADMIN')")
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         if (customerRepository.existsByUsername(registerRequest.getUsername())) {
