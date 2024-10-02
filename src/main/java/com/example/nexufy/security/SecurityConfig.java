@@ -62,7 +62,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4280")); // Permitir el origen de tu frontend
+        configuration.setAllowedOrigins(Arrays.asList("https://blue-bay-040a5d710.5.azurestaticapps.net")); // Permitir el origen de tu frontend
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "*")); // Permitir todos los headers
         configuration.setAllowCredentials(true); // Permitir credenciales si es necesario
