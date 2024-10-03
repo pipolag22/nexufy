@@ -1,6 +1,6 @@
 package com.example.nexufy.service;
 
-import Dtos.CustomerContactDto;
+import com.example.nexufy.Dtos.CustomerContactDto;
 import com.example.nexufy.persistence.entities.Customer;
 import com.example.nexufy.persistence.entities.EnumRoles;
 import com.example.nexufy.persistence.entities.Product;

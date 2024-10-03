@@ -1,6 +1,6 @@
 package com.example.nexufy.controller;
 
-import Dtos.CustomerContactDto;
+import com.example.nexufy.Dtos.CustomerContactDto;
 import com.example.nexufy.payload.request.RegisterRequest;
 import com.example.nexufy.payload.response.MessageResponse;
 import com.example.nexufy.persistence.entities.Customer;
