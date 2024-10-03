@@ -27,10 +27,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "*")
 public class AuthController {
+
     @Autowired
     AuthenticationManager authenticationManager;
 
@@ -46,6 +47,7 @@ public class AuthController {
     @Autowired
     JwtUtils jwtUtils;
 
+    // Login remains the same
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
@@ -66,35 +68,56 @@ public class AuthController {
                 roles));
     }
 
-    //@PreAuthorize("hasRole('ADMIN') or hasRole('SUPERADMIN')")
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<?> registerAsUser(@Valid @RequestBody RegisterRequest registerRequest) {
         if (customerRepository.existsByUsername(registerRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
 
         if (customerRepository.existsByEmail(registerRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
         }
 
+        // Crear nuevo usuario con rol USER
+        Customer customer = new Customer(registerRequest.getUsername(),
+                registerRequest.getEmail(),
+                encoder.encode(registerRequest.getPassword()));
+
+        // Asignar el rol de USER por defecto
+        Role userRole = roleRepository.findByName(EnumRoles.ROLE_USER)
+                .orElseThrow(() -> new RuntimeException("Error: User Role is not found."));
+        Set<Role> roles = new HashSet<>();
+        roles.add(userRole);
+        customer.setRoles(roles);
+
+        customerRepository.save(customer);
+
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
+    // Endpoint para que administradores creen usuarios
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPERADMIN')")
+    @PostMapping("/register-admin")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+        if (customerRepository.existsByUsername(registerRequest.getUsername())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
+        }
+
+        if (customerRepository.existsByEmail(registerRequest.getEmail())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
+        }
 
         Customer customer = new Customer(registerRequest.getUsername(),
                 registerRequest.getEmail(),
                 encoder.encode(registerRequest.getPassword()));
 
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
 
         Set<Role> roles = new HashSet<>();
         if (userDetails.getAuthorities().stream()
                 .anyMatch(role -> role.getAuthority().equals("ROLE_SUPERADMIN"))) {
-            // Si es superadmin, puede asignar cualquier rol
+            // Superadmin puede asignar cualquier rol
             Role adminRole = roleRepository.findByName(EnumRoles.ROLE_ADMIN)
                     .orElseThrow(() -> new RuntimeException("Error: Admin Role is not found."));
             Role userRole = roleRepository.findByName(EnumRoles.ROLE_USER)
@@ -106,7 +129,6 @@ public class AuthController {
             roles.add(userRole); // Agregar rol de usuario
         } else if (userDetails.getAuthorities().stream()
                 .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"))) {
-
             Role userRole = roleRepository.findByName(EnumRoles.ROLE_USER)
                     .orElseThrow(() -> new RuntimeException("Error: User Role is not found."));
             roles.add(userRole);
