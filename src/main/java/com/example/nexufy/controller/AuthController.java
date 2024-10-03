@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/auth")
-public class    AuthController {
+public class   AuthController {
 
     @Autowired
     AuthenticationManager authenticationManager;
