@@ -1,19 +1,16 @@
 package com.example.nexufy.security.jwt;
 
-import java.security.Key;
-import java.util.Date;
-
-import com.example.nexufy.security.services.UserDetailsImpl;
-import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
+import java.security.Key;
+import java.util.Date;
 
 @Component
 public class JwtUtils {
@@ -22,15 +19,19 @@ public class JwtUtils {
     @Value("${nexufy.app.jwtSecret}")
     private String jwtSecret;
 
-
     @Value("${nexufy.app.jwtExpirationMs}")
     private int jwtExpirationMs;
 
+    // Método para generar un token JWT usando el objeto Authentication
     public String generateJwtToken(Authentication authentication) {
-        UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+        String username = authentication.getName(); // Obtener el nombre del usuario desde Authentication
+        return generateToken(username);
+    }
 
+    // Método para generar un token JWT usando solo el nombre de usuario (para casos donde no haya un objeto Authentication)
+    public String generateToken(String username) {
         return Jwts.builder()
-                .setSubject(userPrincipal.getUsername())
+                .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key(), SignatureAlgorithm.HS256)
@@ -58,8 +59,6 @@ public class JwtUtils {
             logger.error("JWT token is unsupported: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
             logger.error("JWT claims string is empty: {}", e.getMessage());
-        } catch (SignatureException e) {
-            logger.error("Invalid JWT signature: {}", e.getMessage());
         }
 
         return false;
