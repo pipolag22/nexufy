@@ -79,6 +79,10 @@ public class Customer {
         this.suspendedUntil = suspendedUntil;
     }
 
+    public boolean isStillSuspended() {
+        return this.isSuspended && this.suspendedUntil != null && this.suspendedUntil.isAfter(LocalDateTime.now());
+    }
+
     public String getSuspendedReason() {
         return suspendedReason;
     }
