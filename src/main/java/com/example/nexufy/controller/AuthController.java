@@ -27,10 +27,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
-public class AuthController {
+public class    AuthController {
 
     @Autowired
     AuthenticationManager authenticationManager;
