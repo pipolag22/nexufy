@@ -62,12 +62,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Permitir el origen del frontend
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173","https://blue-bay-040a5d710.5.azurestaticapps.net")); // Permitir el origen del frontend
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "*")); // Permitir todos los headers
-        configuration.setAllowCredentials(true); // Permitir credenciales
-
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "*"));
+        configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
