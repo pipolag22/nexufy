@@ -86,6 +86,9 @@ public class ProductService {
 
     public void deleteProduct(String id) {productRepository.deleteById(id);}
 
+    public List<Product> searchProducts(String name){
+        return productRepository.findByNameContainingIgnoreCase(name);
+    }
 
     public Product updateProduct(String id, Product product) {
         product.setId(id);
