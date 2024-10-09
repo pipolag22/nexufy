@@ -61,6 +61,8 @@ public class Customer {
         this.password = password;
     }
 
+
+
     // Getters y setters
 
     public boolean isSuspended() {
@@ -210,4 +212,5 @@ public class Customer {
     public void setRole(EnumRoles role) {
         this.role = role;
     }
+
 }
