@@ -1,11 +1,14 @@
 package com.example.nexufy.service;
 
+import com.example.nexufy.Dtos.CustomerContactDto;
 import com.example.nexufy.persistence.entities.Customer;
 import com.example.nexufy.persistence.entities.EnumRoles;
 import com.example.nexufy.persistence.entities.Product;
 import com.example.nexufy.persistence.repository.CustomerRepository;
+import com.example.nexufy.persistence.repository.ProductRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +18,9 @@ import java.util.Optional;
 public class CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     public Customer findById(String id) {
 
@@ -37,6 +43,12 @@ public class CustomerService {
 
     public Customer saveCustomer(Customer customer) {
         validateCustomer(customer);
+        return customerRepository.save(customer);
+    }
+    @Autowired
+    private PasswordEncoder encoder;
+    public Customer updateCustomerPassword(Customer customer, String newPassword) {
+        customer.setPassword(encoder.encode(newPassword));
         return customerRepository.save(customer);
     }
 
@@ -82,13 +94,10 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
+    // Método corregido para obtener productos por Customer ID
     public List<Product> getProductsByCustomerId(String customerId) {
-        Optional<Customer> optionalCustomer = customerRepository.findById(customerId);
-        if (optionalCustomer.isPresent()) {
-            return optionalCustomer.get().getProducts();
-        } else {
-            throw new RuntimeException("Customer not found with id: " + customerId);
-        }
+        // Buscar los productos relacionados con el cliente en la colección de productos
+        return productRepository.findByCustomerId(customerId);
     }
 
     // Método para validar permisos de creación según roles
@@ -107,6 +116,18 @@ public class CustomerService {
         if (EnumRoles.ROLE_SUPERADMIN.equals(newCustomerRole)) {
             throw new IllegalArgumentException("Creating superadmin is not allowed");
         }
+    }
+
+    public CustomerContactDto getCustomerContactById(String id) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        return new CustomerContactDto(
+                customer.getName(),
+                customer.getEmail(),
+                customer.getPhone(),
+                customer.getAddress()
+        );
     }
 
 
