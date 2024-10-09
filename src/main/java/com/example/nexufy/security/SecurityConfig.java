@@ -82,6 +82,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/products/**").permitAll()
                         .requestMatchers("/api/rating-comments/**").permitAll()
+                        .requestMatchers("/api/superadmin/*").permitAll()
                         .requestMatchers("/api/customer/**").authenticated()
                         .requestMatchers("/api/user/promote/admin").hasRole("USER")
                         .requestMatchers("/api/admin/promote/superadmin").hasRole("ADMIN")

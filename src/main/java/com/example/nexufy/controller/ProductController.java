@@ -29,6 +29,10 @@ public class ProductController {
         return productService.getAllProducts();
     }
 
+    @GetMapping("/search")
+    public List<Product> search(@RequestParam String name){
+        return productService.searchProducts(name);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable String id) {
@@ -39,7 +43,7 @@ public class ProductController {
 
     @PostMapping
     public Product createProduct(@RequestBody Product product) {
-        return productService.saveProduct(product);
+        return productService.addProduct(product);
     }
 
 
