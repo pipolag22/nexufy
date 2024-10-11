@@ -40,7 +40,7 @@ public class SecurityConfig {
         return new AuthTokenFilter();
     }
 
-    // Crear PasswordEncoder como bean separado
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
