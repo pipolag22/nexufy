@@ -36,7 +36,7 @@ public class ProductController {
         return productService.getAllProducts();
     }
 
-    // Buscar productos por nombre
+
     @GetMapping("/search")
     public List<Product> search(@RequestParam String name){
         return productService.searchProducts(name);
@@ -49,6 +49,7 @@ public class ProductController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
 
     // Crear producto con imagen (la imagen es obligatoria)
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -73,7 +74,10 @@ public class ProductController {
         } catch (IOException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+
+    @PostMapping
+    public Product createProduct(@RequestBody Product product) {
+
     }
 
     // Actualizar producto con imagen (la imagen es obligatoria)

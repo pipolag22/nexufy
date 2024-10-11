@@ -27,10 +27,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/auth")
-public class AuthController {
+public class   AuthController {
 
     @Autowired
     AuthenticationManager authenticationManager;
@@ -67,7 +67,6 @@ public class AuthController {
                 userDetails.getEmail(),
                 roles));
     }
-
 
     @PostMapping("/register")
     public ResponseEntity<?> registerAsUser(@Valid @RequestBody RegisterRequest registerRequest) {
