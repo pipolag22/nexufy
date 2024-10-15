@@ -1,14 +1,21 @@
 package com.example.nexufy.controller;
 
 import com.example.nexufy.payload.request.AddProfile;
+import com.example.nexufy.payload.request.LoginRequest;
+
+import com.example.nexufy.Dtos.CustomerContactDto;
+
 import com.example.nexufy.payload.request.RegisterRequest;
+import com.example.nexufy.payload.response.JwtResponse;
 import com.example.nexufy.payload.response.MessageResponse;
 import com.example.nexufy.persistence.entities.Customer;
 import com.example.nexufy.persistence.entities.EnumRoles;
 import com.example.nexufy.persistence.entities.Product;
 import com.example.nexufy.persistence.repository.CustomerRepository;
+import com.example.nexufy.security.jwt.JwtUtils;
 import com.example.nexufy.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +24,8 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/customer")
@@ -30,19 +39,44 @@ public class CustomerController {
     @Autowired
     private PasswordEncoder encoder;
 
+    @Autowired
+    private JwtUtils jwtUtils;
+
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody Customer loginRequest) {
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
         Optional<Customer> customerOpt = customerService.findByUsername(loginRequest.getUsername());
 
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
-            if (customer.getPassword().equals(loginRequest.getPassword())) {
-                return ResponseEntity.ok("Login successful");
+
+            // Verificar si la cuenta está suspendida
+            if (customer.isStillSuspended()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(new MessageResponse("Error: Tu cuenta está suspendida hasta " + customer.getSuspendedUntil()));
+            }
+
+            // Verificar la contraseña
+            if (encoder.matches(loginRequest.getPassword(), customer.getPassword())) {
+                // Generar el token JWT utilizando jwtUtils
+                String token = jwtUtils.generateToken(customer.getUsername());
+
+                // Obtener roles y otros detalles del usuario para enviarlos en la respuesta
+                List<String> roles = customer.getRoles().stream()
+                        .map(role -> role.getName().name()) // Suponiendo que `role.getName()` devuelve un Enum
+                        .collect(Collectors.toList());
+
+                return ResponseEntity.ok(new JwtResponse(
+                        token, // El JWT token
+                        customer.getId(), // El ID del usuario
+                        customer.getUsername(), // El nombre de usuario
+                        customer.getEmail(), // El correo electrónico
+                        roles // La lista de roles
+                ));
             } else {
-                return ResponseEntity.badRequest().body("Invalid password");
+                return ResponseEntity.badRequest().body(new MessageResponse("Error: Contraseña incorrecta"));
             }
         } else {
-            return ResponseEntity.badRequest().body("User not found");
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Usuario no encontrado"));
         }
     }
 
@@ -60,7 +94,7 @@ public class CustomerController {
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
 
-        // Create new user's account
+        // Crear cuenta de usuario
         Customer customer = new Customer();
         customer.setUsername(registerRequest.getUsername());
         customer.setEmail(registerRequest.getEmail());
@@ -88,7 +122,7 @@ public class CustomerController {
         customer.setRole(role);
         customerRepository.save(customer);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        return ResponseEntity.ok(new MessageResponse("Usuario registrado exitosamente!"));
     }
 
     @PostMapping("/add")
@@ -125,6 +159,11 @@ public class CustomerController {
         return ResponseEntity.ok("Customer deleted successfully");
     }
 
+    @GetMapping("/{id}/contact")
+        public CustomerContactDto getCustomerContact(@PathVariable String id) {
+            return customerService.getCustomerContactById(id);
+        }
+
     @PutMapping("/{id}")
     public ResponseEntity<String> updateCustomer(@PathVariable String id,
                                                  @RequestBody Customer customer) {
@@ -145,36 +184,4 @@ public class CustomerController {
             return ResponseEntity.badRequest().body(null);
         }
     }
-    @PutMapping("/profile/{id}")
-    public ResponseEntity<String> updateCustomerProfile(@PathVariable String id,
-                                                        @Valid @RequestBody AddProfile profileUpdate) {
-        try {
-            Customer existingCustomer = customerService.findById(id);
-
-            if (profileUpdate.getName() != null) {
-                existingCustomer.setName(profileUpdate.getName());
-            }
-
-            if (profileUpdate.getLastname() != null) {
-                existingCustomer.setLastname(profileUpdate.getLastname());
-            }
-
-            if (profileUpdate.getAddress() != null) {
-                existingCustomer.setAddress(profileUpdate.getAddress());
-            }
-
-            if (profileUpdate.getBirthdate() != null) {
-                existingCustomer.setBirthdate(profileUpdate.getBirthdate());
-            }
-
-            existingCustomer.setEmail(profileUpdate.getEmail());
-
-            customerService.save(existingCustomer);
-
-            return ResponseEntity.ok("Customer profile updated successfully");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
 }

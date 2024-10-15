@@ -39,9 +39,11 @@ public class ProductController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+
     @PostMapping
     public Product createProduct(@RequestBody Product product) {
         return productService.addProduct(product);
+
     }
 
 

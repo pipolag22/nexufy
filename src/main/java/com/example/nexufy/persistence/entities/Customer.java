@@ -61,6 +61,8 @@ public class Customer {
         this.password = password;
     }
 
+
+
     // Getters y setters
 
     public boolean isSuspended() {
@@ -77,6 +79,10 @@ public class Customer {
 
     public void setSuspendedUntil(LocalDateTime suspendedUntil) {
         this.suspendedUntil = suspendedUntil;
+    }
+
+    public boolean isStillSuspended() {
+        return this.isSuspended && this.suspendedUntil != null && this.suspendedUntil.isAfter(LocalDateTime.now());
     }
 
     public String getSuspendedReason() {
@@ -206,4 +212,5 @@ public class Customer {
     public void setRole(EnumRoles role) {
         this.role = role;
     }
+
 }
