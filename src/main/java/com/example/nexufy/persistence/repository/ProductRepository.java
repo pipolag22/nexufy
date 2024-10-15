@@ -14,5 +14,6 @@ public interface ProductRepository extends MongoRepository<Product, String> {
     @Query("{ 'customer.id': ?0 }")
     List<Product> findByCustomerId(String customerId);
     List<Product> findByNameContainingIgnoreCase(String name);
+}
 
 

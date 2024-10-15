@@ -24,8 +24,6 @@ import java.util.stream.Collectors;
 public class ProductService {
     @Autowired
     private ProductRepository productRepository;
-    @Autowired
-    private AzureBlobService azureBlobService;
 
 
     @Autowired
