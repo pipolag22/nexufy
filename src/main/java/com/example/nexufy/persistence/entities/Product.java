@@ -39,7 +39,7 @@ public class Product {
     }
 
     private boolean isSuspended;
-    private LocalDateTime suspendedUntil; // Fecha hasta cuando está suspendido
+    private LocalDateTime suspendedUntil;
     private String suspendedReason;
 
 
