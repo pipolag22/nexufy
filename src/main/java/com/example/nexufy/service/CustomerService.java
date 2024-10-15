@@ -148,9 +148,9 @@ public class CustomerService {
             throw new IllegalArgumentException("Password is required");
         }
 
-        EnumRoles role = customer.getRole();
-        if (!EnumRoles.ROLE_USER.equals(role) && !EnumRoles.ROLE_ADMIN.equals(role) && !EnumRoles.ROLE_SUPERADMIN.equals(role)) {
-            throw new IllegalArgumentException("Invalid role");
-        }
+        //EnumRoles role = customer.getRole();
+        //if (!EnumRoles.ROLE_USER.equals(role) && !EnumRoles.ROLE_ADMIN.equals(role) && !EnumRoles.ROLE_SUPERADMIN.equals(role)) {
+        //    throw new IllegalArgumentException("Invalid role");
+        //}
     }
 }
