@@ -7,8 +7,16 @@ import com.example.nexufy.persistence.repository.CustomerRepository;
 import com.example.nexufy.persistence.repository.ProductRepository;
 import com.example.nexufy.persistence.repository.RatingCommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,8 +25,10 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
+
     @Autowired
     private CustomerRepository customerRepository;
+    @Autowired
     private RatingCommentRepository ratingCommentRepository;
 
 
@@ -64,25 +74,9 @@ public class ProductService {
     }
 
     public Product addProduct(Product product) {
-        // Verifica si el cliente está presente
-        if (product.getCustomer() != null && product.getCustomer().getId() != null) {
-            Optional<Customer> customerOpt = customerRepository.findById(product.getCustomer().getId());
-            if (customerOpt.isPresent()) {
-                Customer customer = customerOpt.get();
-                // Añade el producto a la lista de productos del cliente
-                List<Product> products = customer.getProducts();
-                if (products == null) {
-                    products = new ArrayList<>();
-                }
-                products.add(product);
-                customer.setProducts(products);
-                customerRepository.save(customer); // Guarda el cliente actualizado
-            }
-        }
-
-        // Guarda el producto
         return productRepository.save(product);
     }
+
 
     public void deleteProduct(String id) {productRepository.deleteById(id);}
 
@@ -90,8 +84,37 @@ public class ProductService {
         return productRepository.findByNameContainingIgnoreCase(name);
     }
 
-    public Product updateProduct(String id, Product product) {
-        product.setId(id);
-        return productRepository.save(product);
+    public Product updateProduct(String id, Product productDetails) {
+        Optional<Product> optionalProduct = productRepository.findById(id);
+
+        if (optionalProduct.isPresent()) {
+            Product existingProduct = optionalProduct.get();
+
+            // Actualizar los campos necesarios
+            existingProduct.setName(productDetails.getName());
+            existingProduct.setDescription(productDetails.getDescription());
+            existingProduct.setPrice(productDetails.getPrice());
+            existingProduct.setStock(productDetails.getStock());
+            existingProduct.setCategory(productDetails.getCategory());
+            existingProduct.setProvider(productDetails.getProvider());
+            existingProduct.setSerialNumber(productDetails.getSerialNumber());
+            existingProduct.setLength(productDetails.getLength());
+            existingProduct.setWidth(productDetails.getWidth());
+            existingProduct.setHeight(productDetails.getHeight());
+            existingProduct.setWeight(productDetails.getWeight());
+            existingProduct.setUrlImage(productDetails.getUrlImage());
+            existingProduct.setState(productDetails.getState());
+            existingProduct.setCustomer(productDetails.getCustomer());
+            existingProduct.setSuspended(productDetails.isSuspended());
+            existingProduct.setSuspendedUntil(productDetails.getSuspendedUntil());
+            existingProduct.setSuspendedReason(productDetails.getSuspendedReason());
+
+            // Guarda el producto actualizado
+            return productRepository.save(existingProduct);
+        } else {
+            throw new RuntimeException("Producto no encontrado con id: " + id);
+        }
     }
+
+
 }
