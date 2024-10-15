@@ -150,4 +150,9 @@ public class CustomerController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
+    @GetMapping("/search")
+    public List<Customer> search(@RequestParam String username){
+        return customerService.searchCustomers(username);
+    }
 }

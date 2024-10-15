@@ -56,6 +56,10 @@ public class CustomerService {
         return customerRepository.findAll();
     }
 
+    public List<Customer> searchCustomers(String username){
+        return customerRepository.findByNameContainingIgnoreCase(username);
+    }
+
     public Optional<Customer> getCustomerById(String id) {
         return customerRepository.findById(id);
     }
