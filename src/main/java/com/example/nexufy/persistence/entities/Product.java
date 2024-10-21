@@ -14,11 +14,7 @@ public class Product {
     private String name;
     private String description;
     private double price;
-
     private int stock;
-
-
-
     private String category;
     private String provider;
     private int serialNumber;
@@ -28,50 +24,18 @@ public class Product {
     private double weight;
     private String urlImage;
     private String state;
+
     @JsonIgnoreProperties
     private Customer customer;
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
 
     private boolean isSuspended;
     private LocalDateTime suspendedUntil;
     private String suspendedReason;
 
-
-
-
-
-
+    // Nuevo campo para la fecha de publicación
+    private LocalDateTime publicationDate;
 
     // Getters y Setters
-    public boolean isSuspended() {
-        return isSuspended;
-    }
-
-    public void setSuspended(boolean isSuspended) {
-        this.isSuspended = isSuspended;
-    }
-
-    public LocalDateTime getSuspendedUntil() {
-        return suspendedUntil;
-    }
-
-    public void setSuspendedUntil(LocalDateTime suspendedUntil) {
-        this.suspendedUntil = suspendedUntil;
-    }
-
-    public String getSuspendedReason() {
-        return suspendedReason;
-    }
-
-    public void setSuspendedReason(String suspendedReason) {
-        this.suspendedReason = suspendedReason;
-    }
 
     public String getId() {
         return id;
@@ -183,5 +147,46 @@ public class Product {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public boolean isSuspended() {
+        return isSuspended;
+    }
+
+    public void setSuspended(boolean isSuspended) {
+        this.isSuspended = isSuspended;
+    }
+
+    public LocalDateTime getSuspendedUntil() {
+        return suspendedUntil;
+    }
+
+    public void setSuspendedUntil(LocalDateTime suspendedUntil) {
+        this.suspendedUntil = suspendedUntil;
+    }
+
+    public String getSuspendedReason() {
+        return suspendedReason;
+    }
+
+    public void setSuspendedReason(String suspendedReason) {
+        this.suspendedReason = suspendedReason;
+    }
+
+    // Getter y Setter para el campo publicationDate
+    public LocalDateTime getPublicationDate() {
+        return publicationDate;
+    }
+
+    public void setPublicationDate(LocalDateTime publicationDate) {
+        this.publicationDate = publicationDate;
     }
 }

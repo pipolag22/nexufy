@@ -115,6 +115,10 @@ public class ProductService {
             throw new RuntimeException("Producto no encontrado con id: " + id);
         }
     }
+    public Map<String, Long> getProductsCountByMonth(List<Product> products) {
+        return products.stream()
+                .collect(Collectors.groupingBy(product -> product.getPublicationDate().getMonth().name(), Collectors.counting()));
+    }
 
 
 }

@@ -1,10 +1,7 @@
 package com.example.nexufy.controller;
 
-import com.example.nexufy.payload.request.AddProfile;
 import com.example.nexufy.payload.request.LoginRequest;
-
 import com.example.nexufy.Dtos.CustomerContactDto;
-
 import com.example.nexufy.payload.request.RegisterRequest;
 import com.example.nexufy.payload.response.JwtResponse;
 import com.example.nexufy.payload.response.MessageResponse;
@@ -49,28 +46,23 @@ public class CustomerController {
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
 
-            // Verificar si la cuenta está suspendida
             if (customer.isStillSuspended()) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(new MessageResponse("Error: Tu cuenta está suspendida hasta " + customer.getSuspendedUntil()));
             }
 
-            // Verificar la contraseña
             if (encoder.matches(loginRequest.getPassword(), customer.getPassword())) {
-                // Generar el token JWT utilizando jwtUtils
                 String token = jwtUtils.generateToken(customer.getUsername());
-
-                // Obtener roles y otros detalles del usuario para enviarlos en la respuesta
                 List<String> roles = customer.getRoles().stream()
-                        .map(role -> role.getName().name()) // Suponiendo que `role.getName()` devuelve un Enum
+                        .map(role -> role.getName().name())
                         .collect(Collectors.toList());
 
                 return ResponseEntity.ok(new JwtResponse(
-                        token, // El JWT token
-                        customer.getId(), // El ID del usuario
-                        customer.getUsername(), // El nombre de usuario
-                        customer.getEmail(), // El correo electrónico
-                        roles // La lista de roles
+                        token,
+                        customer.getId(),
+                        customer.getUsername(),
+                        customer.getEmail(),
+                        roles
                 ));
             } else {
                 return ResponseEntity.badRequest().body(new MessageResponse("Error: Contraseña incorrecta"));
@@ -83,18 +75,13 @@ public class CustomerController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         if (customerRepository.existsByUsername(registerRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
 
         if (customerRepository.existsByEmail(registerRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
         }
 
-        // Crear cuenta de usuario
         Customer customer = new Customer();
         customer.setUsername(registerRequest.getUsername());
         customer.setEmail(registerRequest.getEmail());
@@ -128,7 +115,6 @@ public class CustomerController {
     @PostMapping("/add")
     public ResponseEntity<String> addCustomer(@RequestBody Customer newCustomer,
                                               @RequestParam String creatorUsername) {
-
         try {
             Customer createdCustomer = customerService.addCustomer(newCustomer, creatorUsername);
             return ResponseEntity.ok("Customer added successfully: " + createdCustomer.getId());
@@ -138,8 +124,8 @@ public class CustomerController {
     }
 
     @GetMapping("/all")
-    public List<Customer> getAllCustomers() {
-        return customerService.getAllCustomer();
+    public List<Customer> getAllCustomers() { // Corregido el nombre del método
+        return customerService.getAllCustomers();
     }
 
     @GetMapping("/{id}")
@@ -160,13 +146,12 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}/contact")
-        public CustomerContactDto getCustomerContact(@PathVariable String id) {
-            return customerService.getCustomerContactById(id);
-        }
+    public CustomerContactDto getCustomerContact(@PathVariable String id) {
+        return customerService.getCustomerContactById(id);
+    }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCustomer(@PathVariable String id,
-                                                 @RequestBody Customer customer) {
+    public ResponseEntity<String> updateCustomer(@PathVariable String id, @RequestBody Customer customer) {
         try {
             Customer updatedCustomer = customerService.updateCustomer(id, customer);
             return ResponseEntity.ok("Customer updated successfully: " + updatedCustomer.getId());
