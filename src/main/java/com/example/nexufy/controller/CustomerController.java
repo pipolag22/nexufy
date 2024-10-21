@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/customer")
 public class CustomerController {
+
     @Autowired
     private CustomerService customerService;
 
@@ -86,6 +88,7 @@ public class CustomerController {
         customer.setUsername(registerRequest.getUsername());
         customer.setEmail(registerRequest.getEmail());
         customer.setPassword(encoder.encode(registerRequest.getPassword()));
+        customer.setRegistrationDate(LocalDate.now()); // Establecer fecha de registro
 
         Set<String> strRoles = registerRequest.getRoles();
         EnumRoles role;
@@ -124,7 +127,7 @@ public class CustomerController {
     }
 
     @GetMapping("/all")
-    public List<Customer> getAllCustomers() { // Corregido el nombre del método
+    public List<Customer> getAllCustomers() {
         return customerService.getAllCustomers();
     }
 
@@ -171,7 +174,7 @@ public class CustomerController {
     }
 
     @GetMapping("/search")
-    public List<Customer> search(@RequestParam String username){
+    public List<Customer> search(@RequestParam String username) {
         return customerService.searchCustomers(username);
     }
 }

@@ -28,7 +28,7 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public List<Product> search(@RequestParam String name){
+    public List<Product> search(@RequestParam String name) {
         return productService.searchProducts(name);
     }
 
@@ -39,13 +39,10 @@ public class ProductController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-
     @PostMapping
     public Product createProduct(@RequestBody Product product) {
         return productService.addProduct(product);
-
     }
-
 
     @PutMapping("/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable String id, @RequestBody Product productDetails) {
@@ -54,15 +51,11 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable String id) {
-
         if (productService.getProductById(id).isPresent()) {
             productService.deleteProduct(id);
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
         }
-
-
-
     }
 }
