@@ -1,5 +1,6 @@
 package com.example.nexufy.controller;
 
+import com.example.nexufy.dtos.CustomerDTO;
 import com.example.nexufy.persistence.entities.Customer;
 import com.example.nexufy.persistence.entities.Product;
 import com.example.nexufy.persistence.entities.RatingComment;
@@ -68,20 +69,17 @@ public class SuperAdminCustomerController {
         }
 
         Customer customer = customerOpt.get();
-        // Eliminar todos los productos del cliente
-        List<Product> products = productRepository.findAll().stream()
-                .filter(product -> product.getCustomer().getId().equals(customer.getId()))
-                .toList();
-        for (Product product : products) {
-            productRepository.delete(product);
-        }
+        List<Product> products = productRepository.findByCustomerId(customer.getId());
 
-        // Finalmente, eliminar al cliente
+        // Eliminar productos del cliente
+        productRepository.deleteAll(products);
+
+        // Eliminar al cliente
         customerRepository.delete(customer);
         return ResponseEntity.ok(new MessageResponse("Customer and their products deleted successfully!"));
     }
 
-    // Suspender un cliente por un tiempo determinado (7 o 30 días)
+    // Suspender un cliente por un tiempo determinado
     @PutMapping("/suspend/{id}")
     public ResponseEntity<?> suspendCustomer(@PathVariable String id, @RequestParam int days) {
         Customer customer = customerRepository.findById(id)
@@ -96,7 +94,7 @@ public class SuperAdminCustomerController {
         return ResponseEntity.ok(new MessageResponse("Customer suspended for " + days + " days!"));
     }
 
-    // Retirar manualmente la suspensión de un cliente
+    // Retirar suspensión de un cliente
     @PutMapping("/unsuspend/{id}")
     public ResponseEntity<?> unsuspendCustomer(@PathVariable String id) {
         Customer customer = customerRepository.findById(id)
@@ -113,14 +111,11 @@ public class SuperAdminCustomerController {
     // Gestionar productos de un cliente
     @GetMapping("/{id}/products")
     public ResponseEntity<List<Product>> getCustomerProducts(@PathVariable String id) {
-        List<Product> products = productRepository.findAll().stream()
-                .filter(product -> product.getCustomer().getId().equals(id))
-                .toList();
-
+        List<Product> products = productRepository.findByCustomerId(id);
         return ResponseEntity.ok(products);
     }
 
-    // Suspender un producto por un tiempo determinado (7 o 30 días)
+    // Suspender un producto
     @PutMapping("/product/suspend/{productId}")
     public ResponseEntity<?> suspendProduct(@PathVariable String productId, @RequestParam int days) {
         Product product = productRepository.findById(productId)
@@ -135,7 +130,7 @@ public class SuperAdminCustomerController {
         return ResponseEntity.ok(new MessageResponse("Product suspended for " + days + " days!"));
     }
 
-    // Retirar manualmente la suspensión de un producto
+    // Retirar suspensión de un producto
     @PutMapping("/product/unsuspend/{productId}")
     public ResponseEntity<?> unsuspendProduct(@PathVariable String productId) {
         Product product = productRepository.findById(productId)
@@ -149,7 +144,7 @@ public class SuperAdminCustomerController {
         return ResponseEntity.ok(new MessageResponse("Product suspension removed!"));
     }
 
-    // Eliminar producto de un cliente
+    // Eliminar producto
     @DeleteMapping("/product/{productId}")
     public ResponseEntity<?> deleteProduct(@PathVariable String productId) {
         productRepository.deleteById(productId);
@@ -163,20 +158,19 @@ public class SuperAdminCustomerController {
         return ResponseEntity.ok(comments);
     }
 
-    // Eliminar comentario de un producto
+    // Eliminar comentario
     @DeleteMapping("/product/comment/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable String commentId) {
         ratingCommentRepository.deleteById(commentId);
         return ResponseEntity.ok(new MessageResponse("Comment deleted successfully!"));
     }
 
-    // Suspender comentario de un producto
+    // Suspender comentario
     @PutMapping("/product/comment/suspend/{commentId}")
     public ResponseEntity<?> suspendComment(@PathVariable String commentId) {
         RatingComment comment = ratingCommentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
 
-        // Supongamos que suspendemos comentarios con una acción específica
         comment.setText("This comment has been suspended.");
         ratingCommentRepository.save(comment);
         return ResponseEntity.ok(new MessageResponse("Comment suspended successfully!"));

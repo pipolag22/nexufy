@@ -1,7 +1,5 @@
 package com.example.nexufy.persistence.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -9,16 +7,13 @@ import java.time.LocalDateTime;
 
 @Document(collection = "products")
 public class Product {
+
     @Id
     private String id;
     private String name;
     private String description;
     private double price;
-
     private int stock;
-
-
-
     private String category;
     private String provider;
     private int serialNumber;
@@ -28,160 +23,66 @@ public class Product {
     private double weight;
     private String urlImage;
     private String state;
-    @JsonIgnoreProperties
-    private Customer customer;
-    public Customer getCustomer() {
-        return customer;
-    }
 
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
+    // Solo almacenamos el ID del Customer
+    private String customerId;
 
     private boolean isSuspended;
     private LocalDateTime suspendedUntil;
     private String suspendedReason;
 
-
-
-
-
-
-
     // Getters y Setters
-    public boolean isSuspended() {
-        return isSuspended;
-    }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    public void setSuspended(boolean isSuspended) {
-        this.isSuspended = isSuspended;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public LocalDateTime getSuspendedUntil() {
-        return suspendedUntil;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public void setSuspendedUntil(LocalDateTime suspendedUntil) {
-        this.suspendedUntil = suspendedUntil;
-    }
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
 
-    public String getSuspendedReason() {
-        return suspendedReason;
-    }
+    public int getStock() { return stock; }
+    public void setStock(int stock) { this.stock = stock; }
 
-    public void setSuspendedReason(String suspendedReason) {
-        this.suspendedReason = suspendedReason;
-    }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
-    public String getId() {
-        return id;
-    }
+    public String getProvider() { return provider; }
+    public void setProvider(String provider) { this.provider = provider; }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    public int getSerialNumber() { return serialNumber; }
+    public void setSerialNumber(int serialNumber) { this.serialNumber = serialNumber; }
 
-    public String getName() {
-        return name;
-    }
+    public double getLength() { return length; }
+    public void setLength(double length) { this.length = length; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public double getWidth() { return width; }
+    public void setWidth(double width) { this.width = width; }
 
-    public String getDescription() {
-        return description;
-    }
+    public double getHeight() { return height; }
+    public void setHeight(double height) { this.height = height; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public double getWeight() { return weight; }
+    public void setWeight(double weight) { this.weight = weight; }
 
-    public double getPrice() {
-        return price;
-    }
+    public String getUrlImage() { return urlImage; }
+    public void setUrlImage(String urlImage) { this.urlImage = urlImage; }
 
-    public void setPrice(double price) {
-        this.price = price;
-    }
+    public String getState() { return state; }
+    public void setState(String state) { this.state = state; }
 
-    public int getStock() {
-        return stock;
-    }
+    public String getCustomerId() { return customerId; }
+    public void setCustomerId(String customerId) { this.customerId = customerId; }
 
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
+    public boolean isSuspended() { return isSuspended; }
+    public void setSuspended(boolean isSuspended) { this.isSuspended = isSuspended; }
 
-    public String getCategory() {
-        return category;
-    }
+    public LocalDateTime getSuspendedUntil() { return suspendedUntil; }
+    public void setSuspendedUntil(LocalDateTime suspendedUntil) { this.suspendedUntil = suspendedUntil; }
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getProvider() {
-        return provider;
-    }
-
-    public void setProvider(String provider) {
-        this.provider = provider;
-    }
-
-    public int getSerialNumber() {
-        return serialNumber;
-    }
-
-    public void setSerialNumber(int serialNumber) {
-        this.serialNumber = serialNumber;
-    }
-
-    public double getLength() {
-        return length;
-    }
-
-    public void setLength(double length) {
-        this.length = length;
-    }
-
-    public double getWidth() {
-        return width;
-    }
-
-    public void setWidth(double width) {
-        this.width = width;
-    }
-
-    public double getHeight() {
-        return height;
-    }
-
-    public void setHeight(double height) {
-        this.height = height;
-    }
-
-    public double getWeight() {
-        return weight;
-    }
-
-    public void setWeight(double weight) {
-        this.weight = weight;
-    }
-
-    public String getUrlImage() {
-        return urlImage;
-    }
-
-    public void setUrlImage(String urlImage) {
-        this.urlImage = urlImage;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
+    public String getSuspendedReason() { return suspendedReason; }
+    public void setSuspendedReason(String suspendedReason) { this.suspendedReason = suspendedReason; }
 }

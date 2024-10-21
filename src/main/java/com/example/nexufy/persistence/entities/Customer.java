@@ -35,7 +35,6 @@ public class Customer {
     private String email;
     private String phone;
     private LocalDate birthdate;
-    private LocalDate registrationdate;
 
     @JsonIgnore
     private List<Product> products = new ArrayList<>();
@@ -171,14 +170,6 @@ public class Customer {
 
     public void setBirthdate(LocalDate birthdate) {
         this.birthdate = birthdate;
-    }
-
-    public LocalDate getRegistrationdate() {
-        return registrationdate;
-    }
-
-    public void setRegistrationdate(LocalDate registrationdate) {
-        this.registrationdate = registrationdate;
     }
 
     public List<Product> getProducts() {

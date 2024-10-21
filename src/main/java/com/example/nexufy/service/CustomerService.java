@@ -1,11 +1,13 @@
 package com.example.nexufy.service;
 
-import com.example.nexufy.Dtos.CustomerContactDto;
+import com.example.nexufy.dtos.CustomerContactDto;
+import com.example.nexufy.dtos.CustomerDTO;
+import com.example.nexufy.dtos.ProductDTO;
 import com.example.nexufy.persistence.entities.Customer;
 import com.example.nexufy.persistence.entities.EnumRoles;
-import com.example.nexufy.persistence.entities.Product;
+import com.example.nexufy.persistence.entities.Role;
 import com.example.nexufy.persistence.repository.CustomerRepository;
-import com.example.nexufy.persistence.repository.ProductRepository;
+import com.example.nexufy.service.ProductService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,70 +15,100 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerService {
+
     @Autowired
     private CustomerRepository customerRepository;
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductService productService; // Cambio aquí: Se usa ProductService en lugar de ProductRepository
 
-    public Customer findById(String id) {
+    @Autowired
+    private PasswordEncoder encoder;
 
-        Optional<Customer> optionalCustomer = customerRepository.findById(id);
+    // Conversión de entidad Customer a DTO con productos asociados
+    private CustomerDTO convertToCustomerDTO(Customer customer) {
+        List<ProductDTO> products = productService.getProductsByCustomerId(customer.getId());
 
-        return optionalCustomer.orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+        return new CustomerDTO(
+                customer.getId(),
+                customer.getUsername(),
+                customer.getName(),
+                customer.getLastname(),
+                customer.getEmail(),
+                customer.getPhone(),
+                customer.isSuspended(),
+                customer.getRoles(),
+                products // Incluimos la lista de productos
+        );
+    }
+
+    // Método para convertir Customer a CustomerContactDto
+    private CustomerContactDto convertToCustomerContactDto(Customer customer) {
+        return new CustomerContactDto(
+                customer.getName(),
+                customer.getEmail(),
+                customer.getPhone(),
+                customer.getAddress()
+        );
     }
 
     public Customer save(Customer customer) {
         return customerRepository.save(customer);
     }
 
-    public Optional<Customer> findByUsername(String username) {
-        return customerRepository.findByUsername(username);
+    public Optional<CustomerDTO> findByUsername(String username) {
+        return customerRepository.findByUsername(username).map(this::convertToCustomerDTO);
     }
 
-    public Optional<Customer> findByEmail(String email) { // Añadido aquí
-        return customerRepository.findByEmail(email);
+    public Optional<CustomerDTO> findByEmail(String email) {
+        return customerRepository.findByEmail(email).map(this::convertToCustomerDTO);
     }
 
     public Customer saveCustomer(Customer customer) {
         validateCustomer(customer);
         return customerRepository.save(customer);
     }
-    @Autowired
-    private PasswordEncoder encoder;
+
     public Customer updateCustomerPassword(Customer customer, String newPassword) {
         customer.setPassword(encoder.encode(newPassword));
         return customerRepository.save(customer);
     }
 
-    public List<Customer> getAllCustomer() {
-        return customerRepository.findAll();
+    public List<CustomerDTO> getAllCustomers() {
+        return customerRepository.findAll()
+                .stream()
+                .map(this::convertToCustomerDTO)
+                .collect(Collectors.toList());
     }
 
-    public List<Customer> searchCustomers(String username){
-        return customerRepository.findByNameContainingIgnoreCase(username);
+    public List<CustomerDTO> searchCustomers(String username) {
+        return customerRepository.findByNameContainingIgnoreCase(username)
+                .stream()
+                .map(this::convertToCustomerDTO)
+                .collect(Collectors.toList());
     }
 
-    public Optional<Customer> getCustomerById(String id) {
-        return customerRepository.findById(id);
+    public CustomerDTO getCustomerById(String id) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+        return convertToCustomerDTO(customer);
     }
 
     public Customer addCustomer(Customer customer, String creatorUsername) {
-        Optional<Customer> creatorOpt = findByUsername(creatorUsername);
+        Optional<CustomerDTO> creatorOpt = findByUsername(creatorUsername);
 
-        if (!creatorOpt.isPresent()) {
+        if (creatorOpt.isEmpty()) {
             throw new IllegalArgumentException("Creator user not found");
         }
 
-        Customer creator = creatorOpt.get();
-
-        // Validar que el rol del creador tenga permisos para crear el tipo de usuario solicitado
+        CustomerDTO creator = creatorOpt.get();
         validateRolePermissions(creator, customer);
 
-        // Validar que el usuario o email no existan previamente
         if (findByUsername(customer.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username already exists");
         }
@@ -92,28 +124,43 @@ public class CustomerService {
         customerRepository.deleteById(id);
     }
 
-    public Customer updateCustomer(String id, Customer customer) {
-        customer.setId(String.valueOf(new ObjectId(id)));
-        validateCustomer(customer);
+    public Customer updateCustomer(String id, CustomerDTO customerDTO) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+
+        // Actualizamos solo los campos permitidos
+        customer.setName(customerDTO.getName());
+        customer.setLastname(customerDTO.getLastname());
+        customer.setEmail(customerDTO.getEmail());
+        customer.setPhone(customerDTO.getPhone());
+        customer.setSuspended(customerDTO.isSuspended());
+
         return customerRepository.save(customer);
     }
 
-    // Método corregido para obtener productos por Customer ID
-    public List<Product> getProductsByCustomerId(String customerId) {
-        // Buscar los productos relacionados con el cliente en la colección de productos
-        return productRepository.findByCustomerId(customerId);
+
+    // Cambiado: Ahora usamos el servicio de productos para obtener productos por cliente
+    public List<ProductDTO> getProductsByCustomerId(String customerId) {
+        return productService.getProductsByCustomerId(customerId);
     }
 
-    // Método para validar permisos de creación según roles
-    public void validateRolePermissions(Customer creator, Customer newCustomer) {
-        EnumRoles creatorRole = creator.getRole();
+    public CustomerContactDto getCustomerContactById(String id) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        return convertToCustomerContactDto(customer);
+    }
+
+    public void validateRolePermissions(CustomerDTO creator, Customer newCustomer) {
+        Set<Role> creatorRole = creator.getRole();
         EnumRoles newCustomerRole = newCustomer.getRole();
 
-        if (EnumRoles.ROLE_USER.equals(newCustomerRole) && !(EnumRoles.ROLE_ADMIN.equals(creatorRole) || EnumRoles.ROLE_SUPERADMIN.equals(creatorRole))) {
+        if (EnumRoles.ROLE_USER.equals(newCustomerRole) &&
+                !(EnumRoles.ROLE_ADMIN.equals(creatorRole) || EnumRoles.ROLE_SUPERADMIN.equals(creatorRole))) {
             throw new IllegalArgumentException("Only admins or superadmins can create users");
         }
 
-        if (EnumRoles.ROLE_ADMIN.equals(newCustomerRole) && !EnumRoles.ROLE_SUPERADMIN.equals(creatorRole)) {
+        if (EnumRoles.ROLE_ADMIN.equals(newCustomerRole) &&
+                !EnumRoles.ROLE_SUPERADMIN.equals(creatorRole)) {
             throw new IllegalArgumentException("Only superadmins can create admins");
         }
 
@@ -121,19 +168,6 @@ public class CustomerService {
             throw new IllegalArgumentException("Creating superadmin is not allowed");
         }
     }
-
-    public CustomerContactDto getCustomerContactById(String id) {
-        Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-
-        return new CustomerContactDto(
-                customer.getName(),
-                customer.getEmail(),
-                customer.getPhone(),
-                customer.getAddress()
-        );
-    }
-
 
     private void validateCustomer(Customer customer) {
         if (customer.getUsername() == null || customer.getUsername().isEmpty()) {
@@ -147,10 +181,5 @@ public class CustomerService {
         if (customer.getPassword() == null || customer.getPassword().isEmpty()) {
             throw new IllegalArgumentException("Password is required");
         }
-
-        //EnumRoles role = customer.getRole();
-        //if (!EnumRoles.ROLE_USER.equals(role) && !EnumRoles.ROLE_ADMIN.equals(role) && !EnumRoles.ROLE_SUPERADMIN.equals(role)) {
-        //    throw new IllegalArgumentException("Invalid role");
-        //}
     }
 }
