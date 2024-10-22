@@ -35,6 +35,7 @@ public class Customer {
     private String email;
     private String phone;
     private LocalDate birthdate;
+    private LocalDate registrationDate; // Cambio realizado aquí
 
     @JsonIgnore
     private List<Product> products = new ArrayList<>();
@@ -59,8 +60,6 @@ public class Customer {
         this.email = email;
         this.password = password;
     }
-
-
 
     // Getters y setters
 
@@ -172,6 +171,14 @@ public class Customer {
         this.birthdate = birthdate;
     }
 
+    public LocalDate getRegistrationDate() { // Cambio realizado aquí
+        return registrationDate;
+    }
+
+    public void setRegistrationDate(LocalDate registrationDate) { // Cambio realizado aquí
+        this.registrationDate = registrationDate;
+    }
+
     public List<Product> getProducts() {
         return products;
     }
@@ -203,5 +210,4 @@ public class Customer {
     public void setRole(EnumRoles role) {
         this.role = role;
     }
-
 }

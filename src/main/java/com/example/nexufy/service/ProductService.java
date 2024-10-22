@@ -132,4 +132,10 @@ public class ProductService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
+
+
+    public Map<String, Long> getProductsCountByMonth(List<Product> products) {
+        return products.stream()
+                .collect(Collectors.groupingBy(product -> product.getPublicationDate().getMonth().name(), Collectors.counting()));
+    }
 }

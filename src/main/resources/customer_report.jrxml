@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="CustomerReport" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+
+    <field name="name" class="java.lang.String"/>
+    <field name="email" class="java.lang.String"/>
+    <field name="registrationDate" class="java.util.Date"/>
+
+    <title>
+        <band height="50">
+            <staticText>
+                <reportElement x="0" y="0" width="555" height="50"/>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[Reporte de Usuarios Registrados]]></text>
+            </staticText>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="20">
+            <staticText>
+                <reportElement x="0" y="0" width="150" height="20"/>
+                <textElement textAlignment="Left"/>
+                <text><![CDATA[Nombre]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="150" y="0" width="150" height="20"/>
+                <textElement textAlignment="Left"/>
+                <text><![CDATA[Email]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="300" y="0" width="150" height="20"/>
+                <textElement textAlignment="Left"/>
+                <text><![CDATA[Fecha de Registro]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="150" height="20"/>
+                <textElement textAlignment="Left"/>
+                <textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="150" y="0" width="150" height="20"/>
+                <textElement textAlignment="Left"/>
+                <textFieldExpression><![CDATA[$F{email}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="300" y="0" width="150" height="20"/>
+                <textElement textAlignment="Left"/>
+                <textFieldExpression><![CDATA[$F{registrationDate}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+</jasperReport>

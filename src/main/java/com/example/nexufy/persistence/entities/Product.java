@@ -31,6 +31,7 @@ public class Product {
     private LocalDateTime suspendedUntil;
     private String suspendedReason;
 
+    private LocalDateTime publicationDate;
     // Getters y Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -85,4 +86,7 @@ public class Product {
 
     public String getSuspendedReason() { return suspendedReason; }
     public void setSuspendedReason(String suspendedReason) { this.suspendedReason = suspendedReason; }
+
+    public LocalDateTime getPublicationDate() {return publicationDate;}
+    public void setPublicationDate(LocalDateTime publicationDate) {this.publicationDate = publicationDate;}
 }
