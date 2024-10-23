@@ -113,4 +113,7 @@ public class ProductService {
         return products.stream()
                 .collect(Collectors.groupingBy(product -> product.getPublicationDate().getMonth().name(), Collectors.counting()));
     }
+    public long countAllProducts() {
+        return productRepository.count();
+    }
 }

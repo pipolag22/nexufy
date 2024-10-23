@@ -1,0 +1,39 @@
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="ProductReport" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+
+    <!-- Definición del campo "name" -->
+    <field name="name" class="java.lang.String"/>
+
+    <!-- Título del reporte -->
+    <title>
+        <band height="50">
+            <staticText>
+                <reportElement x="0" y="0" width="555" height="50"/>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[Reporte de Productos]]></text>
+            </staticText>
+        </band>
+    </title>
+
+    <!-- Detalle del reporte: Mostrar productos -->
+    <detail>
+        <!-- Mostrar nombre del producto -->
+        <band height="20">
+            <staticText>
+                <reportElement x="0" y="0" width="555" height="20"/>
+                <textElement textAlignment="Left"/>
+                <text><![CDATA[Nombre del Producto]]></text>
+            </staticText>
+        </band>
+
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="150" height="20"/>
+                <textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+</jasperReport>
