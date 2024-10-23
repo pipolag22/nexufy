@@ -1,4 +1,4 @@
-package com.example.nexufy.Dtos;
+package com.example.nexufy.dtos;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 

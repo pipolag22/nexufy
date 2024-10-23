@@ -1,43 +1,92 @@
 package com.example.nexufy.service;
 
-
+import com.example.nexufy.dtos.ProductDTO;
+import com.example.nexufy.persistence.entities.Customer;
 import com.example.nexufy.persistence.entities.Product;
 import com.example.nexufy.persistence.entities.RatingComment;
 import com.example.nexufy.persistence.repository.CustomerRepository;
 import com.example.nexufy.persistence.repository.ProductRepository;
 import com.example.nexufy.persistence.repository.RatingCommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Service;
-
-
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import java.time.LocalDateTime;
 
 @Service
 public class ProductService {
 
     @Autowired
-    private ProductRepository productRepository;
+    private CustomerRepository customerRepository;
 
     @Autowired
-    private CustomerRepository customerRepository;
+    private ProductRepository productRepository;
 
     @Autowired
     private RatingCommentRepository ratingCommentRepository;
 
-    public Product saveProduct(Product product) {
-        return productRepository.save(product);
+    // Conversión de Product a ProductDTO
+    private ProductDTO convertToDTO(Product product) {
+        return new ProductDTO(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getCategory(),
+                product.getUrlImage(),
+                product.getState(),
+                product.getCustomerId() // Usamos solo el ID del cliente
+        );
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    // Conversión de ProductDTO a Product
+    private Product convertToEntity(ProductDTO dto) {
+        Product product = new Product();
+        product.setId(dto.getId());
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setPrice(dto.getPrice());
+        product.setCategory(dto.getCategory());
+        product.setUrlImage(dto.getUrlImage());
+        product.setState(dto.getState());
+        product.setCustomerId(dto.getCustomerId()); // Asignamos el ID del cliente
+        return product;
     }
 
-    public List<Product> getTopRatedProducts() {
+    public List<ProductDTO> getAllProducts() {
+        return productRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public Optional<ProductDTO> getProductById(String id) {
+        return productRepository.findById(id).map(this::convertToDTO);
+    }
+
+    public ProductDTO addProductWithCustomer(String customerId, ProductDTO productDTO) {
+        Product product = convertToEntity(productDTO);
+
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado con id: " + customerId));
+
+        product.setCustomerId(customerId); // Establecemos el ID del cliente
+        productRepository.save(product);
+
+        return convertToDTO(product);
+    }
+
+    public void deleteProduct(String id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + id));
+        productRepository.deleteById(id);
+    }
+
+    public List<ProductDTO> searchProducts(String name) {
+        return productRepository.findByNameContainingIgnoreCase(name).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+    public List<ProductDTO> getTopRatedProducts() {
         List<Product> allProducts = productRepository.findAll();
         List<RatingComment> allRatings = ratingCommentRepository.findAll();
 
@@ -56,58 +105,34 @@ public class ProductService {
                 ));
 
         return allProducts.stream()
-                .sorted((p1, p2) -> Double.compare(averageRatings.getOrDefault(p2.getId(), 0.0), averageRatings.getOrDefault(p1.getId(), 0.0)))
+                .sorted((p1, p2) -> Double.compare(
+                        averageRatings.getOrDefault(p2.getId(), 0.0),
+                        averageRatings.getOrDefault(p1.getId(), 0.0)))
                 .limit(4)
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+    public ProductDTO updateProduct(String id, ProductDTO productDetails) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + id));
+
+        product.setName(productDetails.getName());
+        product.setDescription(productDetails.getDescription());
+        product.setPrice(productDetails.getPrice());
+        product.setCategory(productDetails.getCategory());
+        product.setUrlImage(productDetails.getUrlImage());
+        product.setState(productDetails.getState());
+
+        Product updatedProduct = productRepository.save(product);
+        return convertToDTO(updatedProduct);
+    }
+
+    public List<ProductDTO> getProductsByCustomerId(String customerId) {
+        return productRepository.findByCustomerId(customerId).stream()
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    public Optional<Product> getProductById(String id) {
-        return productRepository.findById(id);
-    }
-
-    // Modificación en el método addProduct para agregar la fecha de publicación
-    public Product addProduct(Product product) {
-        product.setPublicationDate(LocalDateTime.now());  // Asigna la fecha de publicación
-        return productRepository.save(product);
-    }
-
-    public void deleteProduct(String id) {
-        productRepository.deleteById(id);
-    }
-
-    public List<Product> searchProducts(String name) {
-        return productRepository.findByNameContainingIgnoreCase(name);
-    }
-
-    public Product updateProduct(String id, Product productDetails) {
-        Optional<Product> optionalProduct = productRepository.findById(id);
-
-        if (optionalProduct.isPresent()) {
-            Product existingProduct = optionalProduct.get();
-
-            existingProduct.setName(productDetails.getName());
-            existingProduct.setDescription(productDetails.getDescription());
-            existingProduct.setPrice(productDetails.getPrice());
-            existingProduct.setStock(productDetails.getStock());
-            existingProduct.setCategory(productDetails.getCategory());
-            existingProduct.setProvider(productDetails.getProvider());
-            existingProduct.setSerialNumber(productDetails.getSerialNumber());
-            existingProduct.setLength(productDetails.getLength());
-            existingProduct.setWidth(productDetails.getWidth());
-            existingProduct.setHeight(productDetails.getHeight());
-            existingProduct.setWeight(productDetails.getWeight());
-            existingProduct.setUrlImage(productDetails.getUrlImage());
-            existingProduct.setState(productDetails.getState());
-            existingProduct.setCustomer(productDetails.getCustomer());
-            existingProduct.setSuspended(productDetails.isSuspended());
-            existingProduct.setSuspendedUntil(productDetails.getSuspendedUntil());
-            existingProduct.setSuspendedReason(productDetails.getSuspendedReason());
-
-            return productRepository.save(existingProduct);
-        } else {
-            throw new RuntimeException("Producto no encontrado con id: " + id);
-        }
-    }
 
     public Map<String, Long> getProductsCountByMonth(List<Product> products) {
         return products.stream()
