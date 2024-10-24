@@ -10,7 +10,7 @@
     <!-- Campos para los clientes -->
     <field name="name" class="java.lang.String"/>
     <field name="email" class="java.lang.String"/>
-    <field name="registrationDate" class="java.util.Date"/>
+    <field name="registrationDate" class="java.time.LocalDateTime"/>
 
     <!-- Título del reporte -->
     <title>

@@ -34,6 +34,11 @@ public class CustomerService {
     private CustomerDTO convertToCustomerDTO(Customer customer) {
         List<ProductDTO> products = productService.getProductsByCustomerId(customer.getId());
 
+        // Mapear el Set<Role> a un Set<String> de nombres de roles
+        Set<String> roles = customer.getRoles().stream()
+                .map(role -> role.getName().name())  // Convertir Role a su nombre en String
+                .collect(Collectors.toSet());
+
         return new CustomerDTO(
                 customer.getId(),
                 customer.getUsername(),
@@ -42,8 +47,9 @@ public class CustomerService {
                 customer.getEmail(),
                 customer.getPhone(),
                 customer.isSuspended(),
-                customer.getRoles(),
-                products // Incluimos la lista de productos
+                customer.getRole(),  // EnumRoles como rol principal
+                roles,  // Otros roles como Set<String>
+                products  // Lista de productos
         );
     }
 
@@ -96,7 +102,26 @@ public class CustomerService {
     public CustomerDTO getCustomerById(String id) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
-        return convertToCustomerDTO(customer);
+
+        // Mapear el Set<Role> a un Set<String> de nombres de roles
+        Set<String> roles = customer.getRoles().stream()
+                .map(role -> role.getName().name())  // Convertir EnumRoles en String
+                .collect(Collectors.toSet());
+
+        return new CustomerDTO(
+                customer.getId(),
+                customer.getUsername(),
+                customer.getName(),
+                customer.getLastname(),
+                customer.getEmail(),
+                customer.getPhone(),
+                customer.isSuspended(),
+                customer.getRole(),  // EnumRoles como rol principal
+                roles,  // Otros roles
+                customer.getProducts().stream()
+                        .map(product -> new ProductDTO(product))
+                        .collect(Collectors.toList())
+        );
     }
 
     public Customer addCustomer(Customer customer, String creatorUsername) {
@@ -151,7 +176,7 @@ public class CustomerService {
     }
 
     public void validateRolePermissions(CustomerDTO creator, Customer newCustomer) {
-        Set<Role> creatorRole = creator.getRole();
+        EnumRoles creatorRole = creator.getRole();
         EnumRoles newCustomerRole = newCustomer.getRole();
 
         if (EnumRoles.ROLE_USER.equals(newCustomerRole) &&

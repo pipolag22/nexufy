@@ -1,5 +1,6 @@
 package com.example.nexufy.persistence.entities;
 
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -31,6 +32,11 @@ public class Product {
     private LocalDateTime suspendedUntil;
     private String suspendedReason;
 
+    public void setPublicationDate(LocalDateTime publicationDate) {
+        this.publicationDate = publicationDate;
+    }
+
+    @CreatedDate
     private LocalDateTime publicationDate;
     // Getters y Setters
     public String getId() { return id; }
@@ -87,6 +93,6 @@ public class Product {
     public String getSuspendedReason() { return suspendedReason; }
     public void setSuspendedReason(String suspendedReason) { this.suspendedReason = suspendedReason; }
 
-    public LocalDateTime getPublicationDate() {return publicationDate;}
-    public void setPublicationDate(LocalDateTime publicationDate) {this.publicationDate = publicationDate;}
+    public LocalDateTime getPublicationDate() { return publicationDate; }
+
 }

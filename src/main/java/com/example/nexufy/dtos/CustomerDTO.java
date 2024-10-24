@@ -1,5 +1,6 @@
 package com.example.nexufy.dtos;
 
+import com.example.nexufy.persistence.entities.EnumRoles;
 import com.example.nexufy.persistence.entities.Role;
 import java.io.Serializable;
 import java.util.List;
@@ -13,13 +14,13 @@ public class CustomerDTO implements Serializable {
     private String email;
     private String phone;
     private boolean isSuspended;
-    private Set<Role> role;
+    private EnumRoles role;  // Enum para rol principal
+    private Set<String> roles;  // Set para los otros roles
 
-    // Nueva lista para almacenar los productos asociados al cliente
     private List<ProductDTO> products;
 
     public CustomerDTO(String id, String username, String name, String lastname, String email,
-                       String phone, boolean isSuspended, Set<Role> role, List<ProductDTO> products) {
+                       String phone, boolean isSuspended, EnumRoles role, Set<String> roles, List<ProductDTO> products) {
         this.id = id;
         this.username = username;
         this.name = name;
@@ -28,11 +29,27 @@ public class CustomerDTO implements Serializable {
         this.phone = phone;
         this.isSuspended = isSuspended;
         this.role = role;
+        this.roles = roles;  // Aquí mapeamos los otros roles
         this.products = products;
     }
 
+    // Getters y setters
+    public EnumRoles getRole() {
+        return role;
+    }
 
-    // Getters y Setters
+    public void setRole(EnumRoles role) {
+        this.role = role;
+    }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
+    }
+
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
@@ -54,8 +71,6 @@ public class CustomerDTO implements Serializable {
     public boolean isSuspended() { return isSuspended; }
     public void setSuspended(boolean suspended) { isSuspended = suspended; }
 
-    public Set<Role> getRole() { return role; }
-    public void setRole(Set<Role> role) { this.role = role; }
 
     public List<ProductDTO> getProducts() { return products; }
     public void setProducts(List<ProductDTO> products) { this.products = products; }

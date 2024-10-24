@@ -23,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -102,10 +103,14 @@ public class   AuthController {
         roles.add(userRole);
         customer.setRoles(roles);
 
+        // Asignar la fecha de registro
+        customer.setRegistrationDate(LocalDateTime.now());
+
         customerRepository.save(customer);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
+
 
     // Endpoint para que administradores creen nuevos usuarios
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPERADMIN')")
@@ -143,7 +148,7 @@ public class   AuthController {
             if (registerRequest.getRoles().contains("admin")) {
                 roles.add(adminRole);
             }
-            roles.add(userRole); // Agregar rol de usuario
+            roles.add(userRole);
         } else if (userDetails.getAuthorities().stream()
                 .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"))) {
             // Admin solo puede asignar el rol de USER
@@ -153,8 +158,13 @@ public class   AuthController {
         }
 
         customer.setRoles(roles);
+
+
+        customer.setRegistrationDate(LocalDateTime.now());
+
         customerRepository.save(customer);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
+
 }

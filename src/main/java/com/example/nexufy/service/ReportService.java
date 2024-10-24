@@ -25,7 +25,7 @@ public class ReportService {
 
     // Generar el reporte de clientes
     public byte[] generateCustomerReport(List<Customer> customers) throws JRException {
-        String jrxmlFile = "src/main/resources/customer_report.jrxml"; // Ruta al archivo de diseño del reporte de clientes
+        String jrxmlFile = "src/main/resources/customer_report.jrxml"; //
         JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlFile);
 
         // Seleccionar los últimos 5 clientes, con o sin fecha de registro
@@ -39,7 +39,7 @@ public class ReportService {
                 .limit(5)
                 .collect(Collectors.toList());
 
-        // Crear un data source solo para clientes
+
         JRBeanCollectionDataSource customerDataSource = new JRBeanCollectionDataSource(last5Customers);
 
         // Obtener el total de clientes
@@ -71,7 +71,7 @@ public class ReportService {
 
         // Parámetros del reporte
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("NoProductsMessage", noProductsMessage);  // Agregar mensaje en caso de que no haya productos
+        parameters.put("NoProductsMessage", noProductsMessage);
 
         // Llenar el reporte con los parámetros y el data source
         JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, productDataSource);
