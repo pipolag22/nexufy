@@ -43,6 +43,7 @@ public class CustomerService {
                 customer.getPhone(),
                 customer.isSuspended(),
                 customer.getRoles(),
+                customer.getAddress(),
                 products // Incluimos la lista de productos
         );
     }
@@ -87,7 +88,7 @@ public class CustomerService {
     }
 
     public List<CustomerDTO> searchCustomers(String username) {
-        return customerRepository.findByNameContainingIgnoreCase(username)
+        return customerRepository.findByUsernameContainingIgnoreCase(username)
                 .stream()
                 .map(this::convertToCustomerDTO)
                 .collect(Collectors.toList());
@@ -134,6 +135,7 @@ public class CustomerService {
         customer.setEmail(customerDTO.getEmail());
         customer.setPhone(customerDTO.getPhone());
         customer.setSuspended(customerDTO.isSuspended());
+        customer.setAddress(customerDTO.getAddress());
 
         return customerRepository.save(customer);
     }

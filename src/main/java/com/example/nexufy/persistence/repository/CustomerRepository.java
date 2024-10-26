@@ -13,6 +13,6 @@ public interface CustomerRepository extends MongoRepository<Customer, String> {
     Optional<Customer> findByEmail(String email);
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
-    List<Customer> findByNameContainingIgnoreCase(String username);
+    List<Customer> findByUsernameContainingIgnoreCase(String username);
 
 }

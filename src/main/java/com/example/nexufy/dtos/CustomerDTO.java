@@ -12,6 +12,7 @@ public class CustomerDTO implements Serializable {
     private String lastname;
     private String email;
     private String phone;
+    private String address;
     private boolean isSuspended;
     private Set<Role> role;
 
@@ -19,7 +20,7 @@ public class CustomerDTO implements Serializable {
     private List<ProductDTO> products;
 
     public CustomerDTO(String id, String username, String name, String lastname, String email,
-                       String phone, boolean isSuspended, Set<Role> role, List<ProductDTO> products) {
+                       String phone, boolean isSuspended, Set<Role> role,String address, List<ProductDTO> products) {
         this.id = id;
         this.username = username;
         this.name = name;
@@ -28,6 +29,7 @@ public class CustomerDTO implements Serializable {
         this.phone = phone;
         this.isSuspended = isSuspended;
         this.role = role;
+        this.address=address;
         this.products = products;
     }
 
@@ -60,6 +62,10 @@ public class CustomerDTO implements Serializable {
     public List<ProductDTO> getProducts() { return products; }
     public void setProducts(List<ProductDTO> products) { this.products = products; }
 
+    public String getAddress() {return address; }
+
+    public void setAddress(String address) { this.address = address; }
+
     @Override
     public String toString() {
         return "CustomerDTO{" +
@@ -70,6 +76,7 @@ public class CustomerDTO implements Serializable {
                 ", email='" + email + '\'' +
                 ", phone='" + phone + '\'' +
                 ", isSuspended=" + isSuspended +
+                ", address= "+ address+
                 ", products=" + products +
                 '}';
     }
