@@ -151,4 +151,10 @@ public class ProductService {
     public long countAllProducts() {
         return productRepository.count();
     }
+
+    public Map<String, Long> getProductCountsByCategory() {
+        List<Product> products = productRepository.findAll();
+        return products.stream()
+                .collect(Collectors.groupingBy(Product::getCategory, Collectors.counting()));
+    }
 }

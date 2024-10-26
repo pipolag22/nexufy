@@ -17,17 +17,20 @@
         </band>
     </title>
 
-    <!-- Detalle del reporte: Mostrar productos -->
-    <detail>
-        <!-- Mostrar nombre del producto -->
+    <!-- Encabezado de columna -->
+    <columnHeader>
         <band height="20">
             <staticText>
                 <reportElement x="0" y="0" width="555" height="20"/>
                 <textElement textAlignment="Left"/>
-                <text><![CDATA[Nombre del Producto]]></text>
+                <text><![CDATA[Nombre de los Producto:]]></text>
             </staticText>
         </band>
+    </columnHeader>
 
+    <!-- Detalle del reporte: Mostrar productos -->
+    <detail>
+        <!-- Mostrar nombre del producto -->
         <band height="20">
             <textField>
                 <reportElement x="0" y="0" width="150" height="20"/>

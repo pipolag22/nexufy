@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -88,5 +89,10 @@ public class ProductController {
     public ResponseEntity<Long> getTotalProducts() {
         long totalProducts = productService.countAllProducts();
         return ResponseEntity.ok(totalProducts);
+    }
+    @GetMapping("/categories/counts")
+    public ResponseEntity<Map<String, Long>> getProductCountsByCategory() {
+        Map<String, Long> counts = productService.getProductCountsByCategory();
+        return ResponseEntity.ok(counts);
     }
 }
