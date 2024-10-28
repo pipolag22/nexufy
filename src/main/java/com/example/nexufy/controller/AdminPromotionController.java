@@ -19,12 +19,14 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/user")
 public class AdminPromotionController {
+
     @Autowired
     CustomerRepository customerRepository;
 
     @Autowired
     RoleRepository roleRepository;
 
+    // Permitir solo a ROLE_USER para la auto-promoción
     @PreAuthorize("hasRole('USER')")
     @PutMapping("/promote/admin")
     public ResponseEntity<?> promoteToAdmin(@RequestParam String username) {
@@ -36,13 +38,13 @@ public class AdminPromotionController {
         Role adminRole = roleRepository.findByName(EnumRoles.ROLE_ADMIN)
                 .orElseThrow(() -> new RuntimeException("Role not found"));
 
-        // Asignar el nuevo rol
-        Set<Role> roles = customer.getRoles();
-        roles.add(adminRole);
-        customer.setRoles(roles);
+        // Eliminar el rol de usuario (si está presente) para evitar duplicación
+        customer.getRoles().removeIf(role -> role.getName().equals(EnumRoles.ROLE_USER));
 
+        // Asignar el nuevo rol sin duplicación
+        customer.getRoles().add(adminRole);
         customerRepository.save(customer);
+
         return ResponseEntity.ok(new MessageResponse("User promoted to Admin successfully!"));
     }
 }
-
