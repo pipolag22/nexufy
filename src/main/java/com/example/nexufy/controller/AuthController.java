@@ -13,6 +13,8 @@ import com.example.nexufy.security.jwt.JwtUtils;
 import com.example.nexufy.security.services.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,11 +33,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/auth")
-@Tag(name = "Autenticación", description = "Operaciones de autenticación")
-public class   AuthController {
+@Tag(name = "Autenticación", description = "Operaciones relacionadas con autenticación y gestión de usuarios")
+public class AuthController {
 
     @Autowired
     AuthenticationManager authenticationManager;
@@ -52,48 +55,43 @@ public class   AuthController {
     @Autowired
     JwtUtils jwtUtils;
 
-
+    @Operation(summary = "Iniciar sesión", description = "Genera un token JWT para autenticar al usuario.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Autenticación exitosa"),
+            @ApiResponse(responseCode = "403", description = "Cuenta suspendida"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
     @PostMapping("/login")
-    @Operation(summary = "Iniciar sesión", description = "Genera un token JWT para autenticar al usuario")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        // Buscar el usuario por nombre de usuario
         Customer customer = customerRepository.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new RuntimeException("Error: Usuario no encontrado."));
 
-        // Verificar si el usuario está suspendido
         if (customer.isStillSuspended()) {
-            return ResponseEntity.status(403).body(new MessageResponse(
-                    "Error: Tu cuenta está suspendida hasta " + customer.getSuspendedUntil()));
+            return ResponseEntity.status(403).body(
+                    new MessageResponse("Error: Tu cuenta está suspendida hasta " + customer.getSuspendedUntil()));
         }
 
-        // Autenticar al usuario con las credenciales proporcionadas
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
-        // Establecer la autenticación en el contexto de seguridad
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
 
-        // Obtener los detalles del usuario y los roles
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),
-                roles));
+        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(),
+                userDetails.getUsername(), userDetails.getEmail(), roles));
     }
 
+    @Operation(summary = "Registrar un usuario", description = "Registra un nuevo usuario con el rol de usuario.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuario registrado exitosamente"),
+            @ApiResponse(responseCode = "400", description = "El nombre de usuario o correo ya está en uso")
+    })
     @PostMapping("/register")
-
-    @Operation(
-            summary = "Registrar un usuario con rol de administrador",
-            description = "Permite a los administradores registrar nuevos usuarios",
-            security = { @SecurityRequirement(name = "Authorization") }
-    )
     public ResponseEntity<?> registerAsUser(@Valid @RequestBody RegisterRequest registerRequest) {
         if (customerRepository.existsByUsername(registerRequest.getUsername())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
@@ -103,80 +101,61 @@ public class   AuthController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
         }
 
-        // Crear nuevo usuario con rol USER
         Customer customer = new Customer(registerRequest.getUsername(),
-                registerRequest.getEmail(),
-                encoder.encode(registerRequest.getPassword()));
+                registerRequest.getEmail(), encoder.encode(registerRequest.getPassword()));
 
-        // Asignar el rol de USER por defecto
         Role userRole = roleRepository.findByName(EnumRoles.ROLE_USER)
                 .orElseThrow(() -> new RuntimeException("Error: User Role is not found."));
-        Set<Role> roles = new HashSet<>();
-        roles.add(userRole);
-        customer.setRoles(roles);
-
-        // Asignar la fecha de registro
+        customer.setRoles(Set.of(userRole));
         customer.setRegistrationDate(LocalDateTime.now());
 
         customerRepository.save(customer);
-
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
-
-    // Endpoint para que administradores creen nuevos usuarios
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPERADMIN')")
+    @Operation(
+            summary = "Registrar un administrador",
+            description = "Permite a los administradores y superadministradores registrar nuevos usuarios.",
+            security = @SecurityRequirement(name = "Authorization")
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuario registrado exitosamente"),
+            @ApiResponse(responseCode = "400", description = "El nombre de usuario o correo ya está en uso"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado")
+    })
     @PostMapping("/register-admin")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
-        // Verificar si el nombre de usuario ya está tomado
         if (customerRepository.existsByUsername(registerRequest.getUsername())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
 
-        // Verificar si el correo ya está en uso
         if (customerRepository.existsByEmail(registerRequest.getEmail())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
         }
 
-        // Crear el nuevo usuario
         Customer customer = new Customer(registerRequest.getUsername(),
-                registerRequest.getEmail(),
-                encoder.encode(registerRequest.getPassword()));
+                registerRequest.getEmail(), encoder.encode(registerRequest.getPassword()));
 
-        // Obtener la autenticación actual
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        // Asignar roles dependiendo del rol del usuario actual
         Set<Role> roles = new HashSet<>();
         if (userDetails.getAuthorities().stream()
                 .anyMatch(role -> role.getAuthority().equals("ROLE_SUPERADMIN"))) {
-            // Superadmin puede asignar cualquier rol
             Role adminRole = roleRepository.findByName(EnumRoles.ROLE_ADMIN)
                     .orElseThrow(() -> new RuntimeException("Error: Admin Role is not found."));
-            Role userRole = roleRepository.findByName(EnumRoles.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: User Role is not found."));
-
-            if (registerRequest.getRoles().contains("admin")) {
-                roles.add(adminRole);
-            }
-            roles.add(userRole);
-        } else if (userDetails.getAuthorities().stream()
-                .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"))) {
-            // Admin solo puede asignar el rol de USER
-            Role userRole = roleRepository.findByName(EnumRoles.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: User Role is not found."));
-            roles.add(userRole);
+            roles.add(adminRole);
         }
 
+        Role userRole = roleRepository.findByName(EnumRoles.ROLE_USER)
+                .orElseThrow(() -> new RuntimeException("Error: User Role is not found."));
+        roles.add(userRole);
+
         customer.setRoles(roles);
-
-
         customer.setRegistrationDate(LocalDateTime.now());
 
         customerRepository.save(customer);
-
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
-
 }

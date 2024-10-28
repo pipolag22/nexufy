@@ -5,7 +5,11 @@ import com.example.nexufy.persistence.entities.Product;
 import com.example.nexufy.persistence.repository.CustomerRepository;
 import com.example.nexufy.persistence.repository.ProductRepository;
 import com.example.nexufy.service.ReportService;
-import jakarta.servlet.http.HttpServletRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import net.sf.jasperreports.engine.JRException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +17,13 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/reports")
+@Tag(name = "Reportes", description = "Operaciones relacionadas con la generación de reportes")
 public class ReportController {
 
     @Autowired
@@ -26,12 +31,14 @@ public class ReportController {
 
     @Autowired
     private CustomerRepository customerRepository;
+
     @Autowired
     private ProductRepository productRepository;
 
-
-
-    //obtener estadísticas clientes
+    @Operation(summary = "Obtener estadísticas generales de clientes", description = "Devuelve el número total de clientes registrados.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Estadísticas obtenidas exitosamente")
+    })
     @GetMapping("/customers/stats/general")
     public Map<String, Object> getCustomerStats() {
         Map<String, Object> stats = new HashMap<>();
@@ -40,7 +47,11 @@ public class ReportController {
         return stats;
     }
 
-    //descargar el reporte en PDF
+    @Operation(summary = "Descargar reporte de clientes en PDF", description = "Genera un reporte PDF de los clientes y lo envía como archivo descargable.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Reporte generado exitosamente"),
+            @ApiResponse(responseCode = "500", description = "Error interno al generar el reporte")
+    })
     @GetMapping("/customers/download")
     public void generateCustomerReport(HttpServletResponse response) {
         try {
@@ -62,6 +73,10 @@ public class ReportController {
         }
     }
 
+    @Operation(summary = "Obtener estadísticas detalladas", description = "Devuelve estadísticas de clientes y productos por mes.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Estadísticas obtenidas exitosamente")
+    })
     @GetMapping("/customers/stats/details")
     public ResponseEntity<Map<String, Object>> getStatistics() {
         long totalCustomers = reportService.getTotalCustomers();
@@ -78,6 +93,12 @@ public class ReportController {
 
         return ResponseEntity.ok(stats);
     }
+
+    @Operation(summary = "Generar reporte de productos en PDF", description = "Devuelve un reporte PDF con información de los productos.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Reporte generado exitosamente"),
+            @ApiResponse(responseCode = "500", description = "Error interno al generar el reporte")
+    })
     @GetMapping("/product-report")
     public ResponseEntity<byte[]> generateProductReport() throws JRException {
         List<Product> products = productRepository.findAll();
@@ -91,16 +112,18 @@ public class ReportController {
                 .headers(headers)
                 .body(pdfReport);
     }
+
+    @Operation(summary = "Descargar reporte de productos en PDF", description = "Genera y descarga un reporte PDF de productos.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Reporte descargado exitosamente"),
+            @ApiResponse(responseCode = "500", description = "Error interno al generar el reporte")
+    })
     @GetMapping("/products/download")
     public ResponseEntity<byte[]> downloadProductReport(HttpServletResponse response) {
         try {
-            // Obtener los productos de la base de datos
             List<Product> products = productRepository.findAll();
-
-            // Generar el reporte PDF
             byte[] pdfBytes = reportService.generateProductReport(products);
 
-            // Configurar los headers y enviar el PDF como respuesta
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
             headers.setContentDisposition(ContentDisposition.builder("attachment")
@@ -108,11 +131,9 @@ public class ReportController {
                     .build());
 
             return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
-
         } catch (JRException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 }
-
