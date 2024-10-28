@@ -2,16 +2,12 @@ package com.example.nexufy.controller;
 
 import com.example.nexufy.dtos.CustomerDTO;
 import com.example.nexufy.dtos.ProductDTO;
-
 import com.example.nexufy.dtos.CustomerContactDto;
-
 import com.example.nexufy.persistence.entities.Customer;
-import com.example.nexufy.persistence.repository.CustomerRepository;
-import com.example.nexufy.security.jwt.JwtUtils;
+import com.example.nexufy.persistence.entities.EnumRoles;
 import com.example.nexufy.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,38 +16,35 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/customer")
 public class CustomerController {
+
     @Autowired
     private CustomerService customerService;
 
-    @Autowired
-    private CustomerRepository customerRepository;
+    @GetMapping("/{id}")
+    public CustomerDTO getCustomerById(@PathVariable String id) {
+        return customerService.getCustomerById(id);
+    }
 
-    @Autowired
-    private PasswordEncoder encoder;
+    @PutMapping("/promote")
+    public ResponseEntity<String> promoteCustomerToRole(
+            @RequestParam String customerId, @RequestParam EnumRoles role) {
+        customerService.updateCustomerRole(customerId, role);
+        return ResponseEntity.ok("Customer role updated successfully to " + role);
+    }
 
-    @Autowired
-    private JwtUtils jwtUtils;
-
-    @PostMapping("/add")
-    public ResponseEntity<String> addCustomer(@RequestBody Customer newCustomer,
-                                              @RequestParam String creatorUsername) {
-
+    @GetMapping("/{id}/products")
+    public ResponseEntity<List<ProductDTO>> getProductsByCustomerId(@PathVariable String id) {
         try {
-            Customer createdCustomer = customerService.addCustomer(newCustomer, creatorUsername);
-            return ResponseEntity.ok("Customer added successfully: " + createdCustomer.getId());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            List<ProductDTO> products = customerService.getProductsByCustomerId(id);
+            return ResponseEntity.ok(products);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
         }
     }
 
     @GetMapping("/all")
     public List<CustomerDTO> getAllCustomers() {
         return customerService.getAllCustomers();
-    }
-
-    @GetMapping("/{id}")
-    public CustomerDTO getCustomerById(@PathVariable String id) {
-        return customerService.getCustomerById(id);
     }
 
     @DeleteMapping("/{id}")
@@ -61,9 +54,9 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}/contact")
-        public CustomerContactDto getCustomerContact(@PathVariable String id) {
-            return customerService.getCustomerContactById(id);
-        }
+    public CustomerContactDto getCustomerContact(@PathVariable String id) {
+        return customerService.getCustomerContactById(id);
+    }
 
     @PutMapping("/{id}")
     public ResponseEntity<String> updateCustomer(
@@ -77,19 +70,8 @@ public class CustomerController {
         }
     }
 
-
-    @GetMapping("/{id}/products")
-    public ResponseEntity<List<ProductDTO>> getProductsByCustomerId(@PathVariable String id) {
-        try {
-            List<ProductDTO> products = customerService.getProductsByCustomerId(id);
-            return ResponseEntity.ok(products);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(null);
-        }
-    }
-
     @GetMapping("/search")
-    public List<CustomerDTO> search(@RequestParam String username){
+    public List<CustomerDTO> search(@RequestParam String username) {
         return customerService.searchCustomers(username);
     }
 }

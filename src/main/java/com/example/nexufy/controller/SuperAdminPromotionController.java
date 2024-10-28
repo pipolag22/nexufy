@@ -20,6 +20,7 @@ import java.util.Set;
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/admin")
 public class SuperAdminPromotionController {
+
     @Autowired
     CustomerRepository customerRepository;
 
@@ -33,7 +34,7 @@ public class SuperAdminPromotionController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Validar que el usuario ya sea admin
-        if (!customer.getRoles().stream().anyMatch(role -> role.getName().equals(EnumRoles.ROLE_ADMIN))) {
+        if (customer.getRoles().stream().noneMatch(role -> role.getName().equals(EnumRoles.ROLE_ADMIN))) {
             return ResponseEntity.badRequest().body(new MessageResponse("User must be an Admin to promote to SuperAdmin"));
         }
 
@@ -41,12 +42,13 @@ public class SuperAdminPromotionController {
         Role superAdminRole = roleRepository.findByName(EnumRoles.ROLE_SUPERADMIN)
                 .orElseThrow(() -> new RuntimeException("Role not found"));
 
-        // Asignar el nuevo rol
-        Set<Role> roles = customer.getRoles();
-        roles.add(superAdminRole);
-        customer.setRoles(roles);
+        // Eliminar el rol admin duplicado (si está presente) antes de agregar superadmin
+        customer.getRoles().removeIf(role -> role.getName().equals(EnumRoles.ROLE_ADMIN));
 
+        // Asignar el rol de superadmin sin duplicación
+        customer.getRoles().add(superAdminRole);
         customerRepository.save(customer);
+
         return ResponseEntity.ok(new MessageResponse("User promoted to SuperAdmin successfully!"));
     }
 }
