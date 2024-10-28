@@ -1,6 +1,8 @@
 package com.example.nexufy.dtos;
 
+import com.example.nexufy.persistence.entities.Product; // Importamos Product para mapear
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 public class ProductDTO implements Serializable {
     private String id;
@@ -14,8 +16,12 @@ public class ProductDTO implements Serializable {
     // Almacena solo el ID del cliente asociado
     private String customerId;
 
+    private LocalDateTime publicationDate;
+
+    // Constructor completo incluyendo publicationDate
     public ProductDTO(String id, String name, String description, double price,
-                      String category, String urlImage, String state, String customerId) {
+                      String category, String urlImage, String state, String customerId,
+                      LocalDateTime publicationDate) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -24,9 +30,29 @@ public class ProductDTO implements Serializable {
         this.urlImage = urlImage;
         this.state = state;
         this.customerId = customerId;
+        this.publicationDate = publicationDate;
+    }
+
+    // Constructor sin publicationDate
+    public ProductDTO(String id, String name, String description, double price,
+                      String category, String urlImage, String state, String customerId) {
+        this(id, name, description, price, category, urlImage, state, customerId, null);
     }
 
     public ProductDTO() {}
+
+    // Constructor que acepta un objeto Product y mapea sus atributos a ProductDTO
+    public ProductDTO(Product product) {
+        this.id = product.getId();
+        this.name = product.getName();
+        this.description = product.getDescription();
+        this.price = product.getPrice();
+        this.category = product.getCategory();
+        this.urlImage = product.getUrlImage();
+        this.state = product.getState();
+        this.customerId = product.getCustomerId(); // Asume que Product tiene un campo customerId
+        this.publicationDate = product.getPublicationDate(); // Si Product tiene este campo
+    }
 
     // Getters y Setters
     public String getId() { return id; }
@@ -53,6 +79,9 @@ public class ProductDTO implements Serializable {
     public String getCustomerId() { return customerId; }
     public void setCustomerId(String customerId) { this.customerId = customerId; }
 
+    public LocalDateTime getPublicationDate() { return publicationDate; }
+    public void setPublicationDate(LocalDateTime publicationDate) { this.publicationDate = publicationDate; }
+
     @Override
     public String toString() {
         return "ProductDTO{" +
@@ -61,8 +90,10 @@ public class ProductDTO implements Serializable {
                 ", description='" + description + '\'' +
                 ", price=" + price +
                 ", category='" + category + '\'' +
+                ", urlImage='" + urlImage + '\'' +
                 ", state='" + state + '\'' +
                 ", customerId='" + customerId + '\'' +
+                ", publicationDate=" + publicationDate +
                 '}';
     }
 }

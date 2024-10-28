@@ -59,7 +59,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Permitir el origen del frontend
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:8081")); // Permitir
+        // el origen del frontend
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Métodos permitidos
         configuration.setAllowedHeaders(Arrays.asList("*")); // Permitir todos los headers
         configuration.setAllowCredentials(true); // Permitir envío de credenciales (cookies, encabezados de autenticación)
@@ -83,6 +84,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/superadmin/**").hasAuthority("ROLE_SUPERADMIN")
                         .requestMatchers("/api/reports/**").permitAll()
                         .requestMatchers("/api/customer/**").permitAll()
+                        .requestMatchers("/swagger-ui/*", "/v3/api-docs/**", "/api/auth/login").permitAll()
                         .anyRequest().authenticated());
 
         http.authenticationProvider(authenticationProvider());

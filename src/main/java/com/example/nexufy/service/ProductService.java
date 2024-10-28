@@ -10,6 +10,7 @@ import com.example.nexufy.persistence.repository.RatingCommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,7 +36,8 @@ public class ProductService {
                 product.getCategory(),
                 product.getUrlImage(),
                 product.getState(),
-                product.getCustomerId() // Usamos solo el ID del cliente
+                product.getCustomerId(),
+                product.getPublicationDate()
         );
     }
 
@@ -64,15 +66,23 @@ public class ProductService {
     }
 
     public ProductDTO addProductWithCustomer(String customerId, ProductDTO productDTO) {
-        Product product = convertToEntity(productDTO);
 
+        Product product = convertToEntity(productDTO);
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado con id: " + customerId));
 
-        product.setCustomerId(customerId); // Establecemos el ID del cliente
-        productRepository.save(product);
+        product.setCustomerId(customerId);
 
-        return convertToDTO(product);
+        product.setPublicationDate(LocalDateTime.now());
+
+        Product savedProduct = productRepository.save(product);
+
+        customer.getProducts().add(savedProduct);
+        customerRepository.save(customer);
+
+        ProductDTO savedProductDTO = convertToDTO(savedProduct);
+
+        return savedProductDTO;
     }
 
     public void deleteProduct(String id) {
@@ -137,5 +147,14 @@ public class ProductService {
     public Map<String, Long> getProductsCountByMonth(List<Product> products) {
         return products.stream()
                 .collect(Collectors.groupingBy(product -> product.getPublicationDate().getMonth().name(), Collectors.counting()));
+    }
+    public long countAllProducts() {
+        return productRepository.count();
+    }
+
+    public Map<String, Long> getProductCountsByCategory() {
+        List<Product> products = productRepository.findAll();
+        return products.stream()
+                .collect(Collectors.groupingBy(Product::getCategory, Collectors.counting()));
     }
 }

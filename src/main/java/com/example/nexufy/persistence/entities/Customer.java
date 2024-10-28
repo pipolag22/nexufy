@@ -35,7 +35,7 @@ public class Customer {
     private String email;
     private String phone;
     private LocalDate birthdate;
-    private LocalDate registrationDate; // Cambio realizado aquí
+    private LocalDateTime registrationDate; // Cambio realizado aquí
 
     @JsonIgnore
     private List<Product> products = new ArrayList<>();
@@ -171,11 +171,11 @@ public class Customer {
         this.birthdate = birthdate;
     }
 
-    public LocalDate getRegistrationDate() { // Cambio realizado aquí
+    public LocalDateTime getRegistrationDate() { // Cambio realizado aquí
         return registrationDate;
     }
 
-    public void setRegistrationDate(LocalDate registrationDate) { // Cambio realizado aquí
+    public void setRegistrationDate(LocalDateTime registrationDate) { // Cambio realizado aquí
         this.registrationDate = registrationDate;
     }
 

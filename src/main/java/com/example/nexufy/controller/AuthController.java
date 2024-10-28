@@ -11,6 +11,9 @@ import com.example.nexufy.persistence.repository.CustomerRepository;
 import com.example.nexufy.persistence.repository.RoleRepository;
 import com.example.nexufy.security.jwt.JwtUtils;
 import com.example.nexufy.security.services.UserDetailsImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +34,7 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Autenticación", description = "Operaciones de autenticación")
 public class   AuthController {
 
     @Autowired
@@ -47,7 +52,9 @@ public class   AuthController {
     @Autowired
     JwtUtils jwtUtils;
 
+
     @PostMapping("/login")
+    @Operation(summary = "Iniciar sesión", description = "Genera un token JWT para autenticar al usuario")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         // Buscar el usuario por nombre de usuario
         Customer customer = customerRepository.findByUsername(loginRequest.getUsername())
@@ -81,6 +88,12 @@ public class   AuthController {
     }
 
     @PostMapping("/register")
+
+    @Operation(
+            summary = "Registrar un usuario con rol de administrador",
+            description = "Permite a los administradores registrar nuevos usuarios",
+            security = { @SecurityRequirement(name = "Authorization") }
+    )
     public ResponseEntity<?> registerAsUser(@Valid @RequestBody RegisterRequest registerRequest) {
         if (customerRepository.existsByUsername(registerRequest.getUsername())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
@@ -102,10 +115,14 @@ public class   AuthController {
         roles.add(userRole);
         customer.setRoles(roles);
 
+        // Asignar la fecha de registro
+        customer.setRegistrationDate(LocalDateTime.now());
+
         customerRepository.save(customer);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
+
 
     // Endpoint para que administradores creen nuevos usuarios
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPERADMIN')")
@@ -143,7 +160,7 @@ public class   AuthController {
             if (registerRequest.getRoles().contains("admin")) {
                 roles.add(adminRole);
             }
-            roles.add(userRole); // Agregar rol de usuario
+            roles.add(userRole);
         } else if (userDetails.getAuthorities().stream()
                 .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"))) {
             // Admin solo puede asignar el rol de USER
@@ -153,8 +170,13 @@ public class   AuthController {
         }
 
         customer.setRoles(roles);
+
+
+        customer.setRegistrationDate(LocalDateTime.now());
+
         customerRepository.save(customer);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
+
 }
