@@ -7,6 +7,7 @@ import com.example.nexufy.persistence.entities.Customer;
 import com.example.nexufy.persistence.entities.EnumRoles;
 import com.example.nexufy.persistence.entities.Role;
 import com.example.nexufy.persistence.repository.CustomerRepository;
+import com.example.nexufy.persistence.repository.RoleRepository;
 import com.example.nexufy.service.ProductService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class CustomerService {
 
     @Autowired
     private ProductService productService; // Cambio aquí: Se usa ProductService en lugar de ProductRepository
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Autowired
     private PasswordEncoder encoder;
@@ -209,5 +213,18 @@ public class CustomerService {
         if (customer.getPassword() == null || customer.getPassword().isEmpty()) {
             throw new IllegalArgumentException("Password is required");
         }
+    }
+
+    public Customer updateCustomerRole(String customerId, EnumRoles newRole) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+
+        Role role = roleRepository.findByName(newRole)
+                .orElseThrow(() -> new IllegalArgumentException("Role not found"));
+
+        customer.getRoles().clear(); // Limpiar roles actuales
+        customer.getRoles().add(role); // Asignar el nuevo rol
+
+        return customerRepository.save(customer);
     }
 }
