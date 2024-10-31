@@ -23,9 +23,9 @@
         </band>
     </title>
 
-    <!-- Encabezado de columna para los totales -->
+    <!-- Encabezado de columna que incluye el total y los títulos -->
     <columnHeader>
-        <band height="45">
+        <band height="65">
             <!-- Total de Usuarios -->
             <staticText>
                 <reportElement x="0" y="0" width="200" height="20"/>
@@ -36,6 +36,23 @@
                 <reportElement x="200" y="0" width="100" height="20"/>
                 <textFieldExpression><![CDATA[$P{totalCustomers}]]></textFieldExpression>
             </textField>
+
+            <!-- Encabezados de columnas de usuario -->
+            <staticText>
+                <reportElement x="0" y="25" width="150" height="20"/>
+                <textElement textAlignment="Left"/>
+                <text><![CDATA[Nombre]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="150" y="25" width="150" height="20"/>
+                <textElement textAlignment="Left"/>
+                <text><![CDATA[Email]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="300" y="25" width="150" height="20"/>
+                <textElement textAlignment="Left"/>
+                <text><![CDATA[Fecha de Registro]]></text>
+            </staticText>
         </band>
     </columnHeader>
 
