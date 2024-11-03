@@ -59,8 +59,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:8081","https://nexufyfront.vercel.app/" )); // Permitir
-        // el origen del frontend
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:8081", "https://nexufyfront.vercel.app")); // Permitir el origen del frontend
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Métodos permitidos
         configuration.setAllowedHeaders(Arrays.asList("*")); // Permitir todos los headers
         configuration.setAllowCredentials(true); // Permitir envío de credenciales (cookies, encabezados de autenticación)
@@ -71,28 +70,28 @@ public class SecurityConfig {
     }
 
     @Bean
-public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.cors(cors -> cors.configurationSource(corsConfigurationSource())) // Habilitar CORS con la configuración definida
-            .csrf(csrf -> csrf.disable())
-            .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                    .requestMatchers("/api/auth/**").permitAll()  // Permitir acceso a login y registro
-                    .requestMatchers("/api/products/**").permitAll()
-                    .requestMatchers("/api/rating-comments/**").permitAll()
-                    .requestMatchers("/api/superadmin/**").hasAuthority("ROLE_SUPERADMIN")
-                    .requestMatchers("/api/reports/**").permitAll()
-                    .requestMatchers("/api/customer/**").permitAll()
-                    .requestMatchers("/api/user/promote/admin").hasAuthority("ROLE_USER")
-                    .requestMatchers("/swagger-ui/*", "/v3/api-docs/**", "/api/auth/login").permitAll()
-                    .requestMatchers("/actuator/**", "/public", "/health").permitAll()
-                    .requestMatchers("/health").permitAll()
-                    .anyRequest().authenticated());
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource())) // Habilitar CORS con la configuración definida
+                .csrf(csrf -> csrf.disable())
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()  // Permitir acceso a login y registro
+                        .requestMatchers("/api/products/**").permitAll()
+                        .requestMatchers("/api/rating-comments/**").permitAll()
+                        .requestMatchers("/api/superadmin/**").hasAuthority("ROLE_SUPERADMIN")
+                        .requestMatchers("/api/reports/**").permitAll()
+                        .requestMatchers("/api/customer/**").permitAll()
+                        .requestMatchers("/api/user/promote/admin").hasAuthority("ROLE_USER")
+                        .requestMatchers("/swagger-ui/*", "/v3/api-docs/**", "/api/auth/login").permitAll()
+                        .requestMatchers("/health").permitAll()  // Permitir acceso sin autenticación a /health
+                        .anyRequest().authenticated());
 
-    http.authenticationProvider(authenticationProvider());
-    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.authenticationProvider(authenticationProvider());
+        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 }
+
