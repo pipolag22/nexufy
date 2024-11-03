@@ -55,8 +55,8 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
-    Bean
-public CorsConfigurationSource corsConfigurationSource() {
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
 
     // Puedes cambiar a setAllowedOriginPatterns si tienes variaciones en los subdominios
