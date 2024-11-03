@@ -87,6 +87,7 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                     .requestMatchers("/api/user/promote/admin").hasAuthority("ROLE_USER")
                     .requestMatchers("/swagger-ui/*", "/v3/api-docs/**", "/api/auth/login").permitAll()
                     .requestMatchers("/actuator/**", "/public", "/health").permitAll()
+                    .requestMatchers("/health").permitAll()
                     .anyRequest().authenticated());
 
     http.authenticationProvider(authenticationProvider());
