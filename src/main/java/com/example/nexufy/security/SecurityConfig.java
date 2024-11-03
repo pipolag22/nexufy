@@ -60,8 +60,7 @@ public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOriginPatterns(Arrays.asList(
         "http://localhost:*", 
-        "https://nexufy-front.vercel.app
-p", 
+        "https://nexufy-front.vercel.app", 
         "http://localhost:5173", 
         "http://localhost:8081"
     ));
@@ -80,18 +79,18 @@ p",
                 .csrf(csrf -> csrf.disable())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()  // Permitir acceso a login y registro
-                        .requestMatchers("/api/products/**").permitAll()
-                        .requestMatchers("/api/rating-comments/**").permitAll()
-                        .requestMatchers("/api/superadmin/**").hasAuthority("ROLE_SUPERADMIN")
-                        .requestMatchers("/api/reports/**").permitAll()
-                        .requestMatchers("/api/customer/**").permitAll()
-                        .requestMatchers("/api/user/promote/admin").hasAuthority("ROLE_USER")
-                        .requestMatchers("/swagger-ui/*", "/v3/api-docs/**", "/api/auth/login").permitAll()
-                        .requestMatchers("/health").permitAll()  // Permitir acceso sin autenticación a /health
-                        .anyRequest().authenticated());
+               .authorizeHttpRequests(auth -> auth
+        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+        .requestMatchers("/api/auth/**").permitAll()  // Permitir acceso a login y registro
+        .requestMatchers("/api/products/**").permitAll()
+        .requestMatchers("/api/rating-comments/**").permitAll()
+        .requestMatchers("/api/superadmin/**").hasAuthority("ROLE_SUPERADMIN")
+        .requestMatchers("/api/reports/**").permitAll()
+        .requestMatchers("/api/customer/**").permitAll()
+        .requestMatchers("/api/user/promote/admin").hasAuthority("ROLE_USER")
+        .requestMatchers("/swagger-ui/*", "/v3/api-docs/**", "/api/auth/login").permitAll()
+        .requestMatchers("/health").permitAll()  // Permitir acceso sin autenticación a /health
+        .anyRequest().authenticated());
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
