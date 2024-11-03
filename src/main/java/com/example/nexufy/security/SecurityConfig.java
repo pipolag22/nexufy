@@ -60,7 +60,8 @@ public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOriginPatterns(Arrays.asList(
         "http://localhost:*", 
-        "https://nexufyfront.vercel.app", 
+        "https://nexufy-front.vercel.app
+p", 
         "http://localhost:5173", 
         "http://localhost:8081"
     ));
