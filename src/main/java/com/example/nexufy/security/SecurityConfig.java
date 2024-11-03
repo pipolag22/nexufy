@@ -86,6 +86,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/customer/**").permitAll()
                         .requestMatchers("/api/user/promote/admin").hasAuthority("ROLE_USER")
                         .requestMatchers("/swagger-ui/*", "/v3/api-docs/**", "/api/auth/login").permitAll()
+                        .antMatchers("/actuator/**", "/public", "/health").permitAll()
                         .anyRequest().authenticated());
 
         http.authenticationProvider(authenticationProvider());
