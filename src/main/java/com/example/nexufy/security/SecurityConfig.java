@@ -55,19 +55,20 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
+    Bean
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:8081", "https://nexufyfront.vercel.app")); // Permitir el origen del frontend
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Métodos permitidos
-        configuration.setAllowedHeaders(Arrays.asList("*")); // Permitir todos los headers
-        configuration.setAllowCredentials(true); // Permitir envío de credenciales (cookies, encabezados de autenticación)
+    // Puedes cambiar a setAllowedOriginPatterns si tienes variaciones en los subdominios
+    configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:*", "https://nexufyfront.vercel.app", "http://localhost:5173", "http://localhost:8081"));
+    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    configuration.setAllowedHeaders(Arrays.asList("*"));
+    configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+}
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
