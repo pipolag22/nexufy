@@ -71,26 +71,26 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource())) // Habilitar CORS con la configuración definida
-                .csrf(csrf -> csrf.disable())
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()  // Permitir acceso a login y registro
-                        .requestMatchers("/api/products/**").permitAll()
-                        .requestMatchers("/api/rating-comments/**").permitAll()
-                        .requestMatchers("/api/superadmin/**").hasAuthority("ROLE_SUPERADMIN")
-                        .requestMatchers("/api/reports/**").permitAll()
-                        .requestMatchers("/api/customer/**").permitAll()
-                        .requestMatchers("/api/user/promote/admin").hasAuthority("ROLE_USER")
-                        .requestMatchers("/swagger-ui/*", "/v3/api-docs/**", "/api/auth/login").permitAll()
-                        .antMatchers("/actuator/**", "/public", "/health").permitAll()
-                        .anyRequest().authenticated());
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.cors(cors -> cors.configurationSource(corsConfigurationSource())) // Habilitar CORS con la configuración definida
+            .csrf(csrf -> csrf.disable())
+            .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers("/api/auth/**").permitAll()  // Permitir acceso a login y registro
+                    .requestMatchers("/api/products/**").permitAll()
+                    .requestMatchers("/api/rating-comments/**").permitAll()
+                    .requestMatchers("/api/superadmin/**").hasAuthority("ROLE_SUPERADMIN")
+                    .requestMatchers("/api/reports/**").permitAll()
+                    .requestMatchers("/api/customer/**").permitAll()
+                    .requestMatchers("/api/user/promote/admin").hasAuthority("ROLE_USER")
+                    .requestMatchers("/swagger-ui/*", "/v3/api-docs/**", "/api/auth/login").permitAll()
+                    .requestMatchers("/actuator/**", "/public", "/health").permitAll()
+                    .anyRequest().authenticated());
 
-        http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+    http.authenticationProvider(authenticationProvider());
+    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
