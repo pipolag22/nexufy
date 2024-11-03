@@ -56,11 +56,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-
-    // Puedes cambiar a setAllowedOriginPatterns si tienes variaciones en los subdominios
-    configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:*", "https://nexufyfront.vercel.app", "http://localhost:5173", "http://localhost:8081"));
+    configuration.setAllowedOriginPatterns(Arrays.asList(
+        "http://localhost:*", 
+        "https://nexufyfront.vercel.app", 
+        "http://localhost:5173", 
+        "http://localhost:8081"
+    ));
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(Arrays.asList("*"));
     configuration.setAllowCredentials(true);
